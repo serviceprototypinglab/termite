@@ -1,7 +1,9 @@
 package ch.zhaw.splab.podilizerproc.annotations;
 
 import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.util.SimpleTreeVisitor;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
@@ -38,8 +40,10 @@ public class LambdaProcessor extends AbstractProcessor {
         Messager messager = processingEnv.getMessager();
         List<MethodTree> methods = new ArrayList<>();
         List<ClassTree> classes = new ArrayList<>();
+        List<CompilationUnitTree> cuList = new ArrayList<>();
         MethodScanner methodScanner = new MethodScanner();
         TypeScanner typeScanner = new TypeScanner();
+        CUVisitor cuVisitor = new CUVisitor();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
         if (annotatedMethods.size() == 0){
@@ -56,10 +60,20 @@ public class LambdaProcessor extends AbstractProcessor {
             methodScanner.scan(tp, trees);
             TreePath ctp = trees.getPath(getMostExternalType(element));
             typeScanner.scan(ctp, trees);
+            TreePath tp1 = trees.getPath(getMostExternalType(element));
+            cuVisitor.visit(tp1, trees);
+
         }
         methods.addAll(methodScanner.getMethods());
         classes.addAll(typeScanner.getClasses());
-        messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
+        cuList.addAll(cuVisitor.getCuList());
+        messager.printMessage(Diagnostic.Kind.NOTE, "cu list size is " + cuVisitor.getCuList().size());
+        for (CompilationUnitTree cu:
+             cuList) {
+            messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cu.getPackageName() + " - imports - \n" +
+                    cu.getImports());
+        }
+        //messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
         return true;
     }
 
@@ -95,9 +109,21 @@ public class LambdaProcessor extends AbstractProcessor {
             classes.add(classTree);
             return null;
         }
-
         public List<ClassTree> getClasses() {
             return classes;
+        }
+    }
+
+    private class CUVisitor extends SimpleTreeVisitor{
+        private List<CompilationUnitTree> cuList = new ArrayList<>();
+        @Override
+        public Object visitCompilationUnit(CompilationUnitTree compilationUnitTree, Object o) {
+            cuList.add(compilationUnitTree);
+            return null;
+        }
+
+        public List<CompilationUnitTree> getCuList() {
+            return cuList;
         }
     }
 
