@@ -1,5 +1,6 @@
 package ch.zhaw.splab.podilizerproc.annotations;
 
+import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodTree;
@@ -41,9 +42,10 @@ public class LambdaProcessor extends AbstractProcessor {
         List<MethodTree> methods = new ArrayList<>();
         List<ClassTree> classes = new ArrayList<>();
         List<CompilationUnitTree> cuList = new ArrayList<>();
-        MethodScanner methodScanner = new MethodScanner();
-        TypeScanner typeScanner = new TypeScanner();
-        CUVisitor cuVisitor = new CUVisitor();
+
+        List<LambdaFunction> functions = new ArrayList<>();
+
+
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
         if (annotatedMethods.size() == 0){
@@ -56,24 +58,31 @@ public class LambdaProcessor extends AbstractProcessor {
 //            messager.printMessage(Diagnostic.Kind.NOTE, "Enclosed element of " + element.getSimpleName() + "" +
 //                    " is " + element.getEnclosingElement().getSimpleName() + ". GrandParent is " +
 //                    element.getEnclosingElement().getEnclosingElement().getKind());
+
+            MethodScanner methodScanner = new MethodScanner();
+            TypeScanner typeScanner = new TypeScanner();
+            CUVisitor cuVisitor = new CUVisitor();
+
             TreePath tp = trees.getPath(element);
             methodScanner.scan(tp, trees);
             TreePath ctp = trees.getPath(getMostExternalType(element));
             typeScanner.scan(ctp, trees);
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
-
+            //messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cuVisitor.getCu().getImports());
+            functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu()));
         }
-        methods.addAll(methodScanner.getMethods());
-        classes.addAll(typeScanner.getClasses());
-        cuList.addAll(cuVisitor.getCuList());
-        messager.printMessage(Diagnostic.Kind.NOTE, "cu list size is " + cuVisitor.getCuList().size());
-        for (CompilationUnitTree cu:
-             cuList) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cu.getPackageName() + " - imports - \n" +
-                    cu.getImports());
+        messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
+        for (LambdaFunction function :
+                functions) {
+            messager.printMessage(Diagnostic.Kind.NOTE, "F: " + function.toString());
         }
-        //messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
+//        for (CompilationUnitTree cu:
+//             cuList) {
+//            messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cu.getPackageName() + " - imports - \n" +
+//                    cu.getImports());
+//        }
+//        //messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
         return true;
     }
 
@@ -87,15 +96,21 @@ public class LambdaProcessor extends AbstractProcessor {
      */
     private class MethodScanner extends TreePathScanner {
         private List<MethodTree> methods = new ArrayList<>();
+        private MethodTree method = null;
 
         @Override
         public Object visitMethod(MethodTree methodTree, Object o) {
             methods.add(methodTree);
-            return null;
+            method = methodTree;
+            return methodTree;
         }
 
         private List<MethodTree> getMethods() {
             return methods;
+        }
+
+        public MethodTree getMethod() {
+            return method;
         }
     }
 
@@ -104,26 +119,38 @@ public class LambdaProcessor extends AbstractProcessor {
      */
     private class TypeScanner extends TreePathScanner {
         private List<ClassTree> classes = new ArrayList<>();
+        private ClassTree clazz = null;
         @Override
         public Object visitClass(ClassTree classTree, Object o) {
             classes.add(classTree);
-            return null;
+            clazz = classTree;
+            return classTree;
         }
         public List<ClassTree> getClasses() {
             return classes;
+        }
+
+        public ClassTree getClazz() {
+            return clazz;
         }
     }
 
     private class CUVisitor extends SimpleTreeVisitor{
         private List<CompilationUnitTree> cuList = new ArrayList<>();
+        private CompilationUnitTree cu = null;
         @Override
         public Object visitCompilationUnit(CompilationUnitTree compilationUnitTree, Object o) {
             cuList.add(compilationUnitTree);
+            cu = compilationUnitTree;
             return null;
         }
 
         public List<CompilationUnitTree> getCuList() {
             return cuList;
+        }
+
+        public CompilationUnitTree getCu() {
+            return cu;
         }
     }
 
