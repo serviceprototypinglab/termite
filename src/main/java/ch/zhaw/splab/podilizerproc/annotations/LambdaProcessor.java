@@ -4,18 +4,20 @@ import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.Tree;
 import com.sun.source.util.SimpleTreeVisitor;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
+import com.sun.tools.classfile.AccessFlags;
 
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
-import java.io.FileWriter;
-import java.io.IOException;
+import javax.tools.JavaFileObject;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -45,16 +47,12 @@ public class LambdaProcessor extends AbstractProcessor {
 
         List<LambdaFunction> functions = new ArrayList<>();
 
-
-
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
         if (annotatedMethods.size() == 0){
             return true;
         }
         for (Element element :
                 annotatedMethods) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "" + element.getSimpleName() + "'s most external parent is " +
-                    getMostExternalType(element).getSimpleName());
 //            messager.printMessage(Diagnostic.Kind.NOTE, "Enclosed element of " + element.getSimpleName() + "" +
 //                    " is " + element.getEnclosingElement().getSimpleName() + ". GrandParent is " +
 //                    element.getEnclosingElement().getEnclosingElement().getKind());
@@ -69,14 +67,29 @@ public class LambdaProcessor extends AbstractProcessor {
             typeScanner.scan(ctp, trees);
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
+//            for (Tree tree :
+//                    typeScanner.getClazz().getMembers()) {
+//                messager.printMessage(Diagnostic.Kind.NOTE,tree.toString()  + " has type " + tree.getKind().toString() + "\n");
+//            }
             //messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cuVisitor.getCu().getImports());
+
             functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu()));
         }
-        messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
+        //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
         for (LambdaFunction function :
                 functions) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "F: " + function.toString());
+            //messager.printMessage(Diagnostic.Kind.NOTE, "F: " + function.imports());
+            try {
+                File file  = new File("aws.java");
+                PrintWriter printWriter = new PrintWriter(file);
+                printWriter.print(function.create());
+                printWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
+
 //        for (CompilationUnitTree cu:
 //             cuList) {
 //            messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cu.getPackageName() + " - imports - \n" +
@@ -126,6 +139,7 @@ public class LambdaProcessor extends AbstractProcessor {
             clazz = classTree;
             return classTree;
         }
+
         public List<ClassTree> getClasses() {
             return classes;
         }
@@ -134,7 +148,9 @@ public class LambdaProcessor extends AbstractProcessor {
             return clazz;
         }
     }
-
+    /**
+     * Compilation Unit visitor
+     */
     private class CUVisitor extends SimpleTreeVisitor{
         private List<CompilationUnitTree> cuList = new ArrayList<>();
         private CompilationUnitTree cu = null;
