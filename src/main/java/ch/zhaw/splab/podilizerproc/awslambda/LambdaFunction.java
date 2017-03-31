@@ -13,11 +13,23 @@ public class LambdaFunction {
     MethodTree method;
     ClassTree clazz;
     CompilationUnitTree cu;
+    List<VariableTree> fields = new ArrayList<>();
 
     public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu) {
         this.method = method;
         this.clazz = clazz;
         this.cu = cu;
+        for (Tree tree :
+                clazz.getMembers()) {
+            if (tree.getKind() == Tree.Kind.VARIABLE) {
+                VariableTree field = (VariableTree)tree;
+                //exclude static and final fields from list
+                if (!field.getModifiers().getFlags().contains(Modifier.STATIC) &
+                        !field.getModifiers().getFlags().contains(Modifier.FINAL)){
+                    fields.add(field);
+                }
+            }
+        }
     }
 
     /**
@@ -28,6 +40,8 @@ public class LambdaFunction {
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
         result += "\n" + fieldsToString();
+        result += "\n" + generateHandler();
+        result += "\n" + method.toString();
         return result + "\n}";
     }
 
@@ -78,18 +92,6 @@ public class LambdaFunction {
      * @return fields as {@link String} of of java code to be included;
      */
     public String fieldsToString(){
-        List<VariableTree> fields = new ArrayList<>();
-        for (Tree tree :
-                clazz.getMembers()) {
-            if (tree.getKind() == Tree.Kind.VARIABLE) {
-                VariableTree field = (VariableTree)tree;
-                //exclude static and final fields from list
-                if (!field.getModifiers().getFlags().contains(Modifier.STATIC) &
-                        !field.getModifiers().getFlags().contains(Modifier.FINAL)){
-                    fields.add(field);
-                }
-            }
-        }
         StringBuilder result = new StringBuilder();
         for (VariableTree field :
                 fields) {
@@ -104,7 +106,7 @@ public class LambdaFunction {
      */
     private String getClassSpecification(){
         String result = "public class LambdaFunction";
-        String implementsString = "implements RequestHandler";
+        String implementsString = "implements RequestStreamHandler";
         for (Tree implement:
                 clazz.getImplementsClause()) {
             implementsString += ", " + implement.toString();
@@ -112,6 +114,37 @@ public class LambdaFunction {
         String extendsString = "extends " + clazz.getExtendsClause().toString();
 
         return result + " " + extendsString + " " + implementsString + " {";
+    }
+
+    /**
+     * Generates handler code
+     * @return {@link String} of handler java code
+     */
+    private String generateHandler(){
+        String result = "\tpublic void handleRequest(InputStream inputStream, OutputStream outputStream, " +
+                "Context context) throws IOException {\n" +
+                "\t\tObjectMapper objectMapper = new ObjectMapper();\n" +
+                "\t\tobjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);\n" +
+                "\t\tString inputString = IOUtils.toString(inputStream);\n" +
+                "\t\tInputType inputType = objectMapper.readValue(inputString, InputType.class);\n";
+        for (VariableTree field :
+                fields) {
+            String var = field.getName().toString();
+            result += "\t\tthis." + var + " = inputType.get" + firstLetterToUpperCase(var) + ";\n";
+        }
+        result += "\t}\n";
+        return result;
+    }
+    /**
+     * Replace the first letter of input string to the same uppercase letter
+     * @param string is input String to translation
+     * @return input string with first letter to upper case
+     */
+    public static String firstLetterToUpperCase(String string) {
+        String first = string.substring(0, 1);
+        String second = string.substring(1, string.length());
+        first = first.toUpperCase();
+        return first + second;
     }
 
     @Override
