@@ -14,6 +14,7 @@ public class LambdaFunction {
     ClassTree clazz;
     CompilationUnitTree cu;
     List<VariableTree> fields = new ArrayList<>();
+    Filer awsFiler;
 
     public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu) {
         this.method = method;
@@ -30,6 +31,7 @@ public class LambdaFunction {
                 }
             }
         }
+        awsFiler = new Filer(cu, clazz, method);
     }
 
     /**

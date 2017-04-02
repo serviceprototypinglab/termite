@@ -1,5 +1,6 @@
 package ch.zhaw.splab.podilizerproc.annotations;
 
+import ch.zhaw.splab.podilizerproc.awslambda.Functions;
 import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
@@ -76,18 +77,8 @@ public class LambdaProcessor extends AbstractProcessor {
             functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu()));
         }
         //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
-        for (LambdaFunction function :
-                functions) {
-            //messager.printMessage(Diagnostic.Kind.NOTE, "F: " + function.imports());
-            try {
-                File file  = new File("aws.java");
-                PrintWriter printWriter = new PrintWriter(file);
-                printWriter.print(function.create());
-                printWriter.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        Functions functionsWriter = new Functions(functions);
+        functionsWriter.write();
 
 
 //        for (CompilationUnitTree cu:
