@@ -54,4 +54,31 @@ public class Filer {
 
         return Paths.get(packageName + "/" + clazzName + "/" + methodSpec + "/src/main/java/");
     }
+    // TODO: 4/3/17 optimize get paths methods
+    /**
+     * Generates path for certain lambda function based on package name, class name, method name and parameters number
+     * @return {@link Path} of generated path
+     */
+    public Path getPomPath(){
+        String packageName;
+        String clazzName;
+        String methodSpec;
+
+        if (cu.getPackageName() == null){
+            packageName =  "aws";
+        } else {
+            packageName = "aws/" + cu.getPackageName().toString().replace(',', '/');
+        }
+
+        clazzName = clazz.getSimpleName().toString();
+        int params;
+        if (method.getParameters() == null){
+            params = 0;
+        } else {
+            params = method.getParameters().size();
+        }
+        methodSpec = method.getName().toString() + params;
+
+        return Paths.get(packageName + "/" + clazzName + "/" + methodSpec);
+    }
 }

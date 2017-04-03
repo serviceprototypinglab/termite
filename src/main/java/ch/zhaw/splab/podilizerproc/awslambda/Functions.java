@@ -18,6 +18,11 @@ public class Functions {
      * Writes functions and support classes into files
      */
     public void write(){
+        try {
+            FileUtils.deleteDirectory("aws");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         for (LambdaFunction function :
                 functions) {
             try {
@@ -32,6 +37,9 @@ public class Functions {
                 PrintWriter printWriter1 = new PrintWriter(input);
                 printWriter1.print(function.createInputType());
                 printWriter1.close();
+
+                PomGenerator pomGenerator = new PomGenerator(function.getAwsFiler().getPomPath());
+                pomGenerator.create();
 
             } catch (IOException e) {
                 e.printStackTrace();

@@ -77,10 +77,10 @@ public class LambdaFunction {
                 "com.fasterxml.jackson.databind.*",
                 "com.amazonaws.services.lambda.runtime.RequestHandler"
         };
-        for (ImportTree importTree :
-                cu.getImports()) {
-            imports.add(importTree.getQualifiedIdentifier().toString());
-        }
+//        for (ImportTree importTree :
+//                cu.getImports()) {
+//            imports.add(importTree.getQualifiedIdentifier().toString());
+//        }
         for (String importStr :
                 defaultImports) {
             imports.add(importStr);
@@ -162,6 +162,11 @@ public class LambdaFunction {
         }
         return String.valueOf(result);
     }
+
+    /**
+     * Generates method call expression for lambda class
+     * @return java code line as {@link String}
+     */
     private String generateMethodCall(){
         String result = method.getName().toString() + "(";
         int i = 0;
