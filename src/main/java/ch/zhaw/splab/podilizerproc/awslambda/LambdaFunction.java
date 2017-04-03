@@ -56,7 +56,7 @@ public class LambdaFunction {
      * @return java code of InputType class as a {@link String}
      */
     public String createInputType(){
-        InputType inputType = new InputType(fields);
+        InputType inputType = new InputType(fields, method.getParameters());
         return inputType.create();
     }
 
@@ -114,6 +114,9 @@ public class LambdaFunction {
                 clazz.getImplementsClause()) {
             implementsString += ", " + implement.toString();
         }
+        if (clazz.getExtendsClause() == null){
+            return result + " " + implementsString + " {";
+        }
         String extendsString = "extends " + clazz.getExtendsClause().toString();
 
         return result + " " + extendsString + " " + implementsString + " {";
@@ -133,7 +136,7 @@ public class LambdaFunction {
         for (VariableTree field :
                 fields) {
             String var = field.getName().toString();
-            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + ";\n";
+            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
         }
         result += "\t\t" + generateMethodCall()  + ";\n";
         result += "\t}\n";
@@ -164,10 +167,11 @@ public class LambdaFunction {
         int i = 0;
         for (VariableTree param :
                 method.getParameters()){
+            String getCall = "inputType.get" + Utility.firstLetterToUpperCase(param.getName().toString()) + "()";
             if (i == 0){
-                result += param.getName();
+                result += getCall;
             } else {
-                result += ", " + param.getName();
+                result += ", " + getCall;
             }
             i++;
         }

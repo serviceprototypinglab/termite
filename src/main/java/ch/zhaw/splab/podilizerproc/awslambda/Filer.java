@@ -52,6 +52,6 @@ public class Filer {
         }
         methodSpec = method.getName().toString() + params;
 
-        return Paths.get(packageName + "/" + clazzName + "/" + methodSpec);
+        return Paths.get(packageName + "/" + clazzName + "/" + methodSpec + "/src/main/java/");
     }
 }

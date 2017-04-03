@@ -1,5 +1,7 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
+import org.codehaus.plexus.util.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,13 +14,16 @@ public class Functions {
         this.functions = functions;
     }
 
+    /**
+     * Writes functions and support classes into files
+     */
     public void write(){
         for (LambdaFunction function :
                 functions) {
             try {
                 String path = function.getAwsFiler().getPath().toString();
                 function.getAwsFiler().createDirectories();
-                File file  = new File(path + "/aws.java");
+                File file  = new File(path + "/LambdaFunction.java");
                 PrintWriter printWriter = new PrintWriter(file);
                 printWriter.print(function.create());
                 printWriter.close();
