@@ -16,12 +16,18 @@ public class Functions {
         for (LambdaFunction function :
                 functions) {
             try {
-                String path = function.awsFiler.getPath().toString();
-                function.awsFiler.createDirectories();
+                String path = function.getAwsFiler().getPath().toString();
+                function.getAwsFiler().createDirectories();
                 File file  = new File(path + "/aws.java");
                 PrintWriter printWriter = new PrintWriter(file);
                 printWriter.print(function.create());
                 printWriter.close();
+
+                File input = new File(path + "/InputType.java");
+                PrintWriter printWriter1 = new PrintWriter(input);
+                printWriter1.print(function.createInputType());
+                printWriter1.close();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }

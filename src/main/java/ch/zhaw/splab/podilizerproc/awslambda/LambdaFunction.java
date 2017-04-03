@@ -10,11 +10,11 @@ import java.util.List;
  *Entity of the AWS lambda function
  */
 public class LambdaFunction {
-    MethodTree method;
-    ClassTree clazz;
-    CompilationUnitTree cu;
-    List<VariableTree> fields = new ArrayList<>();
-    Filer awsFiler;
+    private MethodTree method;
+    private ClassTree clazz;
+    private CompilationUnitTree cu;
+    private List<VariableTree> fields = new ArrayList<>();
+    private Filer awsFiler;
 
     public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu) {
         this.method = method;
@@ -34,6 +34,10 @@ public class LambdaFunction {
         awsFiler = new Filer(cu, clazz, method);
     }
 
+    public Filer getAwsFiler() {
+        return awsFiler;
+    }
+
     /**
      * Generates java code lambda function for appropriate method
      * @return {@link String} of generated java code
@@ -41,10 +45,19 @@ public class LambdaFunction {
     public String create(){
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
-        result += "\n" + fieldsToString();
+        result += "\n" + Utility.fieldsToString(fields);
         result += "\n" + generateHandler();
-        result += "\n" + method.toString();
+        result += "\n" + removeAnnotations(method);
         return result + "\n}";
+    }
+
+    /**
+     * Creates InputType class java code
+     * @return java code of InputType class as a {@link String}
+     */
+    public String createInputType(){
+        InputType inputType = new InputType(fields);
+        return inputType.create();
     }
 
 
@@ -89,18 +102,6 @@ public class LambdaFunction {
         return String.valueOf(result);
     }
 
-    /**
-     * Selects fields that need to be added to lambda function class
-     * @return fields as {@link String} of of java code to be included;
-     */
-    public String fieldsToString(){
-        StringBuilder result = new StringBuilder();
-        for (VariableTree field :
-                fields) {
-            result.append("\t" + field.toString() + ";\n");
-        }
-        return String.valueOf(result);
-    }
 
     /**
      * Generates lambda function class specification. Based on 'implements' and 'extends' of external class
@@ -132,21 +133,46 @@ public class LambdaFunction {
         for (VariableTree field :
                 fields) {
             String var = field.getName().toString();
-            result += "\t\tthis." + var + " = inputType.get" + firstLetterToUpperCase(var) + ";\n";
+            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + ";\n";
         }
+        result += "\t\t" + generateMethodCall()  + ";\n";
         result += "\t}\n";
         return result;
     }
+
+
     /**
-     * Replace the first letter of input string to the same uppercase letter
-     * @param string is input String to translation
-     * @return input string with first letter to upper case
+     * Removes "@Lambda" annotation from method and adds "\t" to every string
+     * @param method to be formatted
+     * @return {@link String} of formatted method
      */
-    public static String firstLetterToUpperCase(String string) {
-        String first = string.substring(0, 1);
-        String second = string.substring(1, string.length());
-        first = first.toUpperCase();
-        return first + second;
+    private String removeAnnotations(MethodTree method){
+        String methodString = method.toString();
+        String[] lines = methodString.split("\n");
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < lines.length; i++){
+            if (!lines[i].startsWith("@Lambda")){
+                result.append("\t");
+                result.append(lines[i]);
+                result.append("\n");
+            }
+        }
+        return String.valueOf(result);
+    }
+    private String generateMethodCall(){
+        String result = method.getName().toString() + "(";
+        int i = 0;
+        for (VariableTree param :
+                method.getParameters()){
+            if (i == 0){
+                result += param.getName();
+            } else {
+                result += ", " + param.getName();
+            }
+            i++;
+        }
+        result += ");\n";
+        return result;
     }
 
     @Override
