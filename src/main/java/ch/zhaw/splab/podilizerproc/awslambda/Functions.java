@@ -3,8 +3,11 @@ package ch.zhaw.splab.podilizerproc.awslambda;
 import org.codehaus.plexus.util.FileUtils;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 
 public class Functions {
@@ -38,7 +41,11 @@ public class Functions {
                 printWriter1.print(function.createInputType());
                 printWriter1.close();
 
-                PomGenerator pomGenerator = new PomGenerator(function.getAwsFiler().getPomPath());
+                ClassLoader cl = getClass().getClassLoader();
+                URLClassLoader urlcl = (URLClassLoader)cl;
+                URL[] classPath = urlcl.getURLs();
+
+                PomGenerator pomGenerator = new PomGenerator(function.getAwsFiler().getPomPath(), classPath);
                 pomGenerator.create();
 
             } catch (IOException e) {
@@ -46,5 +53,22 @@ public class Functions {
             }
         }
 
+    }
+    // TODO: 3/28/17 recreate getting of external libraries(include maven dependencies)
+    private void writeExternalCP(String pathOut){
+        ClassLoader cl = getClass().getClassLoader();
+        URLClassLoader urlcl = (URLClassLoader)cl;
+        URL[] classPath = urlcl.getURLs();
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(pathOut + "cp.txt");
+            for (URL path :
+                    classPath) {
+                fileWriter.write(path + "\n");
+            }
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

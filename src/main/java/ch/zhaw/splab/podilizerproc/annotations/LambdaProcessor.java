@@ -14,9 +14,6 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 
 /**
@@ -75,6 +72,7 @@ public class LambdaProcessor extends AbstractProcessor {
         //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
         Functions functionsWriter = new Functions(functions);
         functionsWriter.write();
+
 
 
 //        for (CompilationUnitTree cu:
@@ -177,21 +175,5 @@ public class LambdaProcessor extends AbstractProcessor {
 
     }
 
-    // TODO: 3/28/17 recreate getting of external libraries(include maven dependencies)
-    private void writeExternalCP(){
-        ClassLoader cl = getClass().getClassLoader();
-        URLClassLoader urlcl = (URLClassLoader)cl;
-        URL[] classPath = urlcl.getURLs();
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter("/home/dord/pathsExternal.txt");
-            for (URL path :
-                    classPath) {
-                fileWriter.write(path + "\n");
-            }
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 }
