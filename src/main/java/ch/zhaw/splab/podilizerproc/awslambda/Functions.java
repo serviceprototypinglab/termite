@@ -48,6 +48,9 @@ public class Functions {
                 PomGenerator pomGenerator = new PomGenerator(function.getAwsFiler().getPomPath(), classPath);
                 pomGenerator.create();
 
+                JarBuilder jarBuilder = new JarBuilder(function.getAwsFiler().getPomPath().toString());
+                jarBuilder.mvnBuild();
+
             } catch (IOException e) {
                 e.printStackTrace();
             }
