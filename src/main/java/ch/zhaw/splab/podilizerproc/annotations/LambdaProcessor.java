@@ -61,13 +61,14 @@ public class LambdaProcessor extends AbstractProcessor {
             typeScanner.scan(ctp, trees);
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
+
 //            for (Tree tree :
 //                    typeScanner.getClazz().getMembers()) {
 //                messager.printMessage(Diagnostic.Kind.NOTE,tree.toString()  + " has type " + tree.getKind().toString() + "\n");
 //            }
             //messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cuVisitor.getCu().getImports());
-
-            functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu()));
+            Lambda lambda = element.getAnnotation(Lambda.class);
+            functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda));
         }
         //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
         Functions functionsWriter = new Functions(functions);

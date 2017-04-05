@@ -11,4 +11,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Lambda {
+    String region() default "us-west-2";
+    String role() default "arn:aws:iam::520974061566:role/lambda_basic_execution";
+    int timeOut() default 60;
+    int memorySize() default 1024;
 }

@@ -1,5 +1,6 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
+import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import com.sun.source.tree.*;
 
 import javax.lang.model.element.Modifier;
@@ -15,11 +16,13 @@ public class LambdaFunction {
     private CompilationUnitTree cu;
     private List<VariableTree> fields = new ArrayList<>();
     private Filer awsFiler;
+    private Lambda lamdaAnnotation;
 
-    public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu) {
+    public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu, Lambda lambdaAnnotation) {
         this.method = method;
         this.clazz = clazz;
         this.cu = cu;
+        this.lamdaAnnotation = lambdaAnnotation;
         for (Tree tree :
                 clazz.getMembers()) {
             if (tree.getKind() == Tree.Kind.VARIABLE) {
@@ -32,6 +35,10 @@ public class LambdaFunction {
             }
         }
         awsFiler = new Filer(cu, clazz, method);
+    }
+
+    public Lambda getLamdaAnnotation() {
+        return lamdaAnnotation;
     }
 
     public Filer getAwsFiler() {
