@@ -1,0 +1,26 @@
+Workflow description 
+
+This library uses default java annotations api and processor. Annotation processor handles annotations over the compilation phase before compiling source .java files.
+We devide library workflow on 3 phases:
+- Source code parsing and looking for annotated methods
+- Deployment of the marked method as Lambda function into the cloud
+- Creating smart invokers to get the intarfaces, that call appropriate functions
+
+Deployment phase involves the folowing steps:
+
+- Create the new file tree for every potential lambda function, solving naming issues.
+- Generate Lambda Function code based on FaaS provider's programming model and method body.
+- Generate input .java file, which porpouse is to be a PoJo for sending data to lambda function
+- Fetch the external libraries from classloader
+- Generate pom.xml for each lambda fucntion project including default libraries along with external
+- Compile the project with the help of maven java invoker
+- Read the credentials from default config file of the FaaS provider(Local OS)
+- Use privider api to create lambda function in the cloud
+- Write all output into the the log file
+
+Invokers creating phase is not implemented yet, but the idea will be discribed below:
+
+Synchronous invocation of function works through the HTTP(API Gateway for AWS). AWS provides library to execute function with your java code.
+So far lambda function is implemented without responding and the idea for invoker is to run it a new thread to prevent stoping of the main thread.
+Invoker should create input type instance, initialize it and send it to appropriate lambda function thereby calling the function. 
+
