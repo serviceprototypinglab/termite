@@ -15,6 +15,9 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.*;
 
 /**
@@ -52,10 +55,6 @@ public class LambdaProcessor extends AbstractProcessor {
 
         for (Element element :
                 annotatedMethods) {
-//            messager.printMessage(Diagnostic.Kind.NOTE, "Enclosed element of " + element.getSimpleName() + "" +
-//                    " is " + element.getEnclosingElement().getSimpleName() + ". GrandParent is " +
-//                    element.getEnclosingElement().getEnclosingElement().getKind());
-
             MethodScanner methodScanner = new MethodScanner();
             TypeScanner typeScanner = new TypeScanner();
             CUVisitor cuVisitor = new CUVisitor();
@@ -69,13 +68,21 @@ public class LambdaProcessor extends AbstractProcessor {
             cuVisitor.visit(tp1, trees);
 
 
-//            for (Tree tree :
-//                    typeScanner.getClazz().getMembers()) {
-//                messager.printMessage(Diagnostic.Kind.NOTE,tree.toString()  + " has type " + tree.getKind().toString() + "\n");
-//            }
-            //messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cuVisitor.getCu().getImports());
             Lambda lambda = element.getAnnotation(Lambda.class);
-            functions.add(new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda));
+            LambdaFunction lambdaFunction =
+                    new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda);
+            functions.add(lambdaFunction);
+            try {
+                JavaFileObject inputType = processingEnv.getFiler().createSourceFile("InputType", element);
+                System.out.println("the uri is " + inputType.toUri().toString());
+                Writer writer = inputType.openWriter();
+                writer.append("package aws.inputgenerated;\n");
+                writer.append(lambdaFunction.createInputType());
+                writer.flush();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
         }
         //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
         Functions functionsWriter = new Functions(functions);

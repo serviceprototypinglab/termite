@@ -52,7 +52,7 @@ public class LambdaFunction {
     public String create(){
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
-        result += "\n" + Utility.fieldsToString(fields);
+        //result += "\n" + Utility.fieldsToString(fields);
         result += "\n" + generateHandler();
         result += "\n" + removeAnnotations(method);
         return result + "\n}";
@@ -140,11 +140,11 @@ public class LambdaFunction {
                 "\t\tobjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);\n" +
                 "\t\tString inputString = IOUtils.toString(inputStream);\n" +
                 "\t\tInputType inputType = objectMapper.readValue(inputString, InputType.class);\n";
-        for (VariableTree field :
-                fields) {
-            String var = field.getName().toString();
-            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
-        }
+//        for (VariableTree field :
+//                fields) {
+//            String var = field.getName().toString();
+//            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
+//        }
         result += "\t\t" + generateMethodCall()  + ";\n";
         result += "\t}\n";
         return result;

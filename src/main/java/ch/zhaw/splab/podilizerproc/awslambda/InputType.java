@@ -9,8 +9,9 @@ public class InputType {
     private List<VariableTree> fields;
 
     public InputType(List<VariableTree> fields, List<? extends VariableTree> parameters) {
-        this.fields = fields;
-        fields.addAll(parameters);
+//        this.fields = fields;
+//        fields.addAll(parameters);
+        this.fields = (List<VariableTree>) parameters;
     }
     public String create(){
         String result = "public class InputType{\n";
