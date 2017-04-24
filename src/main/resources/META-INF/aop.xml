@@ -1,0 +1,12 @@
+<aspectj>
+
+    <aspects>
+        <!-- declare existing aspect to the weaver -->
+        <aspect name="ch.zhaw.splab.podilizerproc.aspect.Invoke"/>
+    </aspects>
+    <weaver options="-verbose">
+        <!--<include within="*.*"/>-->
+        <!--<include within="ch.zhaw.splab.podilizerinvoke.aspect.*"/>-->
+    </weaver>
+
+</aspectj>

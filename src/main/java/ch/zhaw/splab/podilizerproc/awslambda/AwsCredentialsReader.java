@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 public class AwsCredentialsReader {
     private String awsAccessKeyId;
     private String awsSecretAccessKey;
-
+    // TODO: 4/6/17 Implement aws user's configurations handling
     /**
      * Reads credentials from aws default config file
      */

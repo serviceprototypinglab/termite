@@ -8,6 +8,12 @@
     <artifactId>PodilizerProc</artifactId>
     <version>0.1</version>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.source-target.version>1.8</java.source-target.version>
+        <aspectj.version>1.8.2</aspectj.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
@@ -26,6 +32,12 @@
             <scope>system</scope>
             <systemPath>${java.home}/../lib/tools.jar</systemPath>
         </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjrt</artifactId>
+            <version>${aspectj.version}</version>
+            <!--<scope>runtime</scope>-->
+        </dependency>
     </dependencies>
 
     <build>
@@ -40,22 +52,6 @@
                     <!-- Disable annotation processing for ourselves. -->
                     <compilerArgument>-proc:none</compilerArgument>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>2.3</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

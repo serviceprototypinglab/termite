@@ -14,6 +14,7 @@ import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.tools.Diagnostic;
 import java.util.*;
 
 /**
@@ -31,9 +32,12 @@ public class LambdaProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         trees = Trees.instance(processingEnv);
+
     }
 
+
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
         Messager messager = processingEnv.getMessager();
         List<MethodTree> methods = new ArrayList<>();
         List<ClassTree> classes = new ArrayList<>();
@@ -45,6 +49,7 @@ public class LambdaProcessor extends AbstractProcessor {
         if (annotatedMethods.size() == 0){
             return true;
         }
+
         for (Element element :
                 annotatedMethods) {
 //            messager.printMessage(Diagnostic.Kind.NOTE, "Enclosed element of " + element.getSimpleName() + "" +
@@ -55,12 +60,14 @@ public class LambdaProcessor extends AbstractProcessor {
             TypeScanner typeScanner = new TypeScanner();
             CUVisitor cuVisitor = new CUVisitor();
 
+
             TreePath tp = trees.getPath(element);
             methodScanner.scan(tp, trees);
             TreePath ctp = trees.getPath(getMostExternalType(element));
             typeScanner.scan(ctp, trees);
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
+
 
 //            for (Tree tree :
 //                    typeScanner.getClazz().getMembers()) {
@@ -82,6 +89,8 @@ public class LambdaProcessor extends AbstractProcessor {
 //                    cu.getImports());
 //        }
 //        //messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
+
+
         return true;
     }
 

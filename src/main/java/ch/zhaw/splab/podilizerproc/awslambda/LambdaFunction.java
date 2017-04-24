@@ -152,7 +152,7 @@ public class LambdaFunction {
 
 
     /**
-     * Removes "@Lambda" annotation from method and adds "\t" to every string
+     * Removes "@Lambda" and "@Invoker" annotations from method and adds "\t" to every string
      * @param method to be formatted
      * @return {@link String} of formatted method
      */
@@ -161,7 +161,7 @@ public class LambdaFunction {
         String[] lines = methodString.split("\n");
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < lines.length; i++){
-            if (!lines[i].startsWith("@Lambda")){
+            if (!lines[i].startsWith("@Lambda") && !lines[i].startsWith("@Invoker")){
                 result.append("\t");
                 result.append(lines[i]);
                 result.append("\n");
