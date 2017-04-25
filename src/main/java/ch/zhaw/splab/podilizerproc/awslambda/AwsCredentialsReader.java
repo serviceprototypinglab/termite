@@ -3,6 +3,7 @@ package ch.zhaw.splab.podilizerproc.awslambda;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 
 public class AwsCredentialsReader {
     private String awsAccessKeyId;
@@ -36,10 +37,10 @@ public class AwsCredentialsReader {
         String accessKeyAttr = "aws_access_key_id = ";
         String secretKeyAttr = "aws_secret_access_key = ";
         if (line.startsWith(accessKeyAttr)){
-            awsAccessKeyId = line.split(accessKeyAttr)[0];
+            awsAccessKeyId = line.split(accessKeyAttr)[1];
         }
         if (line.startsWith(secretKeyAttr)){
-            awsSecretAccessKey = line.split(secretKeyAttr)[0];
+            awsSecretAccessKey = line.split(secretKeyAttr)[1];
         }
 
     }

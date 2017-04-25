@@ -49,14 +49,16 @@ public class Functions {
                 pomGenerator.create();
 
                 JarBuilder jarBuilder = new JarBuilder(function.getAwsFiler().getPomPath().toString());
+
                 jarBuilder.mvnBuild();
 
-                JarUploader jarUploader = new JarUploader(function.getAwsFiler().getPath().toString().replace('/', '_'),
+                JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(),
                         function.getAwsFiler().getPomPath().toString() + "/target/lambda-java-1.0-SNAPSHOT.jar",
                         "LambdaFunction::handleRequest",
                         function.getLamdaAnnotation().region(), function.getLamdaAnnotation().role(),
                         function.getLamdaAnnotation().timeOut(), function.getLamdaAnnotation().memorySize());
                 jarUploader.uploadFunction();
+
 
 
             } catch (IOException e) {

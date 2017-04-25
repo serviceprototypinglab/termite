@@ -40,12 +40,6 @@ public class LambdaProcessor extends AbstractProcessor {
 
 
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
-        Messager messager = processingEnv.getMessager();
-        List<MethodTree> methods = new ArrayList<>();
-        List<ClassTree> classes = new ArrayList<>();
-        List<CompilationUnitTree> cuList = new ArrayList<>();
-
         List<LambdaFunction> functions = new ArrayList<>();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
@@ -74,9 +68,8 @@ public class LambdaProcessor extends AbstractProcessor {
             functions.add(lambdaFunction);
             try {
                 JavaFileObject inputType = processingEnv.getFiler().createSourceFile("InputType", element);
-                System.out.println("the uri is " + inputType.toUri().toString());
                 Writer writer = inputType.openWriter();
-                writer.append("package aws.inputgenerated;\n");
+                writer.append(lambdaFunction.generateInputPackage() + "\n\n");
                 writer.append(lambdaFunction.createInputType());
                 writer.flush();
             } catch (IOException e) {

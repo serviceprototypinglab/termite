@@ -191,6 +191,33 @@ public class LambdaFunction {
         return result;
     }
 
+    /**
+     * Generates package declaration line for InputType
+     * @return generated {@link String} with format 'aws.originalPackage.originalClass.originalMethod#argsNumber'
+     */
+    public String generateInputPackage(){
+        String result = "package aws.";
+        result += getLambdaFunctionName().replace('_', '.');
+        return result + ";";
+    }
+
+    /**
+     * Generates name for lambda function
+     * @return {@link String} in format 'originalPackage_originalClass_originalMethod#argsNumber'
+     */
+    public String getLambdaFunctionName(){
+        String result = "";
+        if (cu.getPackageName() != null){
+            result += cu.getPackageName().toString().replace('.', '_');
+        }
+        result += "_" + clazz.getSimpleName();
+        result += "_" + method.getName().toString();
+        if (method.getParameters() != null){
+            result += method.getParameters().size();
+        }
+        return result;
+    }
+
     @Override
     public String toString() {
         return "LambdaFunction{" +

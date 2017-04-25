@@ -7,6 +7,8 @@
     <weaver options="-verbose">
         <!--<include within="*.*"/>-->
         <!--<include within="ch.zhaw.splab.podilizerinvoke.aspect.*"/>-->
+        <exclude within="org.apache.commons.logging..*"/>
+        <exclude within="org.apache.log4j..*"/>
     </weaver>
 
 </aspectj>

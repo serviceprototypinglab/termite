@@ -65,16 +65,16 @@ class JarUploader {
      * @return generated {@code String}
      */
     private String getCommand() {
-        AwsCredentialsReader credentialsReader = new AwsCredentialsReader();
-        credentialsReader.read();
+//        AwsCredentialsReader credentialsReader = new AwsCredentialsReader();
+//        credentialsReader.read();
         String result = "aws lambda create-function" +
                 " --function-name " + functionName +
                 " --region " + region +
                 " --zip-file fileb://" + zipFile +
                 " --role " + role +
-                " --environment Variables={awsAccessKeyId=" + credentialsReader.getAwsAccessKeyId() + "," +
-                "awsSecretAccessKey=" + credentialsReader.getAwsSecretAccessKey() + "," +
-                "awsRegion=" + region + "}" +
+//                " --environment Variables={awsAccessKeyId=" + credentialsReader.getAwsAccessKeyId() + "," +
+//                "awsSecretAccessKey=" + credentialsReader.getAwsSecretAccessKey() + "," +
+//                "awsRegion=" + region + "}" +
                 " --handler " + handler +
                 " --runtime " + runtime +
                 " --timeout " + timeout +
