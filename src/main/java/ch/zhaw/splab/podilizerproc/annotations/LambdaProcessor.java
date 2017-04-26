@@ -39,7 +39,7 @@ public class LambdaProcessor extends AbstractProcessor {
     }
 
 
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {;
         List<LambdaFunction> functions = new ArrayList<>();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
