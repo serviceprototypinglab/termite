@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aspectj.lang.ProceedingJoinPoint;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class InvokeThread extends Thread {
@@ -49,13 +50,16 @@ public class InvokeThread extends Thread {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
-        try{
-            json = objectMapper.writeValueAsString(clazz.newInstance());
-        } catch (JsonProcessingException e){
-            e.printStackTrace();
-        }  catch (IllegalAccessException e) {
-            e.printStackTrace();
+        try {
+            Object inputObj = clazz.getConstructors()[0].newInstance(joinPoint.getArgs());
+            json = objectMapper.writeValueAsString(inputObj);
         } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         try {

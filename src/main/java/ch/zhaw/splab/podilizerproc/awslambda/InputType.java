@@ -16,6 +16,7 @@ public class InputType {
     public String create(){
         String result = "public class InputType{\n";
         result += Utility.fieldsToString(fields) + "\n";
+        result += generateDefaultConstructor();
         result += generateConstructor();
         result += generateGetters();
         result += generateSetters();
@@ -23,6 +24,14 @@ public class InputType {
         return result;
     }
 
+    /**
+     * Generates default constructor for InputType class
+     * @return formatted {@link String} of default constructor declaration
+     */
+    private String generateDefaultConstructor(){
+        return "\tpublic InputType(){" +
+                "\t};\n";
+    }
     /**
      * Generates constructor block which initialize all fields
      * @return java code of constructor as a {@link String}
