@@ -67,7 +67,14 @@ public class LambdaFunction {
         return inputType.create();
     }
 
-
+    /**
+     * Creates OutputType class java code
+     * @return java code of OutputType class as a {@link String}
+     */
+    public String createOutputType(){
+        OutputType outputType = new OutputType(method.getReturnType());
+        return outputType.create();
+    }
 
     /**
      * Creates list of imports to be added to lambda function compilation unit

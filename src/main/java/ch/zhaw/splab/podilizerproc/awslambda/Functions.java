@@ -41,6 +41,11 @@ public class Functions {
                 printWriter1.print(function.createInputType());
                 printWriter1.close();
 
+                File output = new File(path + "/OutputType.java");
+                PrintWriter printWriter2 =new PrintWriter(output);
+                printWriter2.print(function.createOutputType());
+                printWriter2.close();
+
                 ClassLoader cl = getClass().getClassLoader();
                 URLClassLoader urlcl = (URLClassLoader)cl;
                 URL[] classPath = urlcl.getURLs();
