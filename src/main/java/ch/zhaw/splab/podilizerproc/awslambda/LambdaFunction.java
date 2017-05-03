@@ -153,6 +153,12 @@ public class LambdaFunction {
 //            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
 //        }
         result += "\t\t" + generateMethodCall()  + ";\n";
+        result += "\t\tOutputType outputType = new OutputType(\"Lambda environment\"";
+        if (!method.getReturnType().toString().equals("void")){
+            result += ", result";
+        }
+        result += ");\n";
+        result += "\t\tobjectMapper.writeValue(outputStream, outputType);\n";
         result += "\t}\n";
         return result;
     }
@@ -182,7 +188,11 @@ public class LambdaFunction {
      * @return java code line as {@link String}
      */
     private String generateMethodCall(){
-        String result = method.getName().toString() + "(";
+        String result = "";
+        if (!method.getReturnType().toString().equals("void")){
+            result +=  "" + method.getReturnType().toString() + " result = ";
+        }
+        result += method.getName().toString() + "(";
         int i = 0;
         for (VariableTree param :
                 method.getParameters()){

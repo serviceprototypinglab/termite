@@ -14,6 +14,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 
 public class InvokeThread extends Thread {
     private Method method;
@@ -29,9 +31,11 @@ public class InvokeThread extends Thread {
 
     @Override
     public void run() {
-        Class clazz = null;
+        Class inClazz = null;
+        Class outClazz = null;
         try {
-            clazz = Class.forName(getInputPackage(method));
+            inClazz = Class.forName(getInputPackage(method));
+            outClazz = Class.forName(getOutputPackage(method));
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -51,7 +55,7 @@ public class InvokeThread extends Thread {
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
         try {
-            Object inputObj = clazz.getConstructors()[0].newInstance(joinPoint.getArgs());
+            Object inputObj = inClazz.getConstructors()[0].newInstance(joinPoint.getArgs());
             json = objectMapper.writeValueAsString(inputObj);
         } catch (InstantiationException e) {
             e.printStackTrace();
@@ -62,21 +66,34 @@ public class InvokeThread extends Thread {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+        Object outObj = null;
         try {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
-            lambdaClient.invoke(invokeRequest).getPayload();
+            outObj = objectMapper.readValue(byteBufferToString( lambdaClient.invoke(invokeRequest).getPayload(),
+                    Charset.forName("UTF-8")), outClazz);
         } catch(Exception e) {
             e.printStackTrace();
             System.out.println("Function " + method.getName() + " is unreachable. Processing locally...");
             try {
-                joinPoint.proceed();
+                Object tmp = joinPoint.proceed();
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
+
         }
-        System.out.println("The thread of Function " + method.getName() + " invocation was finished.");
+        try {
+            System.out.println("The thread of Function " + method.getName() + " invocation was finished. " +
+                    "Default return is -- " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
+                    " -- ");
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
     /**
      * Generates package name for input type based on method signature
@@ -86,6 +103,15 @@ public class InvokeThread extends Thread {
     private String getInputPackage(Method method){
         String fullClassName = method.getDeclaringClass().getName();
         return  "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".InputType";
+    }
+    /**
+     * Generates package name for output type based on method signature
+     * @param method is method signature object
+     * @return {@link String} package name of OutputType
+     */
+    private String getOutputPackage(Method method){
+        String fullClassName = method.getDeclaringClass().getName();
+        return  "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".OutputType";
     }
 
     /**
@@ -98,5 +124,16 @@ public class InvokeThread extends Thread {
         result += "_" + method.getName();
         result += method.getParameterCount();
         return result;
+    }
+
+    public static String byteBufferToString(ByteBuffer buffer, Charset charset) {
+        byte[] bytes;
+        if (buffer.hasArray()) {
+            bytes = buffer.array();
+        } else {
+            bytes = new byte[buffer.remaining()];
+            buffer.get(bytes);
+        }
+        return new String(bytes, charset);
     }
 }

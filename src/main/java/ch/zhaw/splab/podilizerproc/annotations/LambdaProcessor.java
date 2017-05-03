@@ -68,10 +68,15 @@ public class LambdaProcessor extends AbstractProcessor {
             functions.add(lambdaFunction);
             try {
                 JavaFileObject inputType = processingEnv.getFiler().createSourceFile("InputType", element);
+                JavaFileObject outputType = processingEnv.getFiler().createSourceFile("OutputType", element);
                 Writer writer = inputType.openWriter();
+                Writer writer1 = outputType.openWriter();
                 writer.append(lambdaFunction.generateInputPackage() + "\n\n");
+                writer1.append(lambdaFunction.generateInputPackage() + "\n\n");
                 writer.append(lambdaFunction.createInputType());
+                writer1.append(lambdaFunction.createOutputType());
                 writer.flush();
+                writer1.flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }

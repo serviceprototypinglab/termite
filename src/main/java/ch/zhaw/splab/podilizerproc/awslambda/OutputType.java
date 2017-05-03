@@ -81,7 +81,7 @@ public class OutputType {
                 "\t\tthis.defaultReturn = defaultReturn;\n" +
                 "\t};\n";
         if (!isVoid){
-            result += "\tpublic void setResult(" + returnType.toString() + " result);\n" +
+            result += "\tpublic void setResult(" + returnType.toString() + " result){\n" +
                     "\t\tthis.result = result;\n" +
                     "\t};\n";
         }
