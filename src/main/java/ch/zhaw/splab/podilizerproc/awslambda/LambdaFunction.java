@@ -63,7 +63,7 @@ public class LambdaFunction {
      * @return java code of InputType class as a {@link String}
      */
     public String createInputType(){
-        InputType inputType = new InputType(fields, method.getParameters());
+        InputTypeEntity inputType = new InputTypeEntity("InputType", method.getParameters());
         return inputType.create();
     }
 
@@ -72,7 +72,7 @@ public class LambdaFunction {
      * @return java code of OutputType class as a {@link String}
      */
     public String createOutputType(){
-        OutputType outputType = new OutputType(method.getReturnType());
+        OutputTypeEntity outputType = new OutputTypeEntity("OutputType", method.getReturnType());
         return outputType.create();
     }
 
@@ -233,6 +233,10 @@ public class LambdaFunction {
             result += method.getParameters().size();
         }
         return result;
+    }
+
+    public MethodTree getMethod() {
+        return method;
     }
 
     @Override
