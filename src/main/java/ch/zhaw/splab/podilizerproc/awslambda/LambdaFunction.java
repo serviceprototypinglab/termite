@@ -143,6 +143,7 @@ public class LambdaFunction {
     private String generateHandler(){
         String result = "\tpublic void handleRequest(InputStream inputStream, OutputStream outputStream, " +
                 "Context context) throws IOException {\n" +
+                "\t\tlong time = System.currentTimeMillis();" +
                 "\t\tObjectMapper objectMapper = new ObjectMapper();\n" +
                 "\t\tobjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);\n" +
                 "\t\tString inputString = IOUtils.toString(inputStream);\n" +
@@ -154,6 +155,7 @@ public class LambdaFunction {
 //        }
         result += "\t\t" + generateMethodCall()  + ";\n";
         result += "\t\tOutputType outputType = new OutputType(\"Lambda environment\"";
+        result += ", System.currentTimeMillis() - time";
         if (!method.getReturnType().toString().equals("void")){
             result += ", result";
         }

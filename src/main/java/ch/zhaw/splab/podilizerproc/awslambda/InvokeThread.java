@@ -85,8 +85,8 @@ public class InvokeThread extends Thread {
         }
         try {
             System.out.println("The thread of Function " + method.getName() + " invocation was finished. " +
-                    "Default return is -- " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
-                    " -- ");
+                    "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
+                    " - for " + outObj.getClass().getDeclaredMethod("getTime", null).invoke(outObj) + " ms");
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
