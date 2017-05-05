@@ -60,8 +60,8 @@ public class Functions {
                 JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(),
                         function.getAwsFiler().getPomPath().toString() + "/target/lambda-java-1.0-SNAPSHOT.jar",
                         "LambdaFunction::handleRequest",
-                        function.getLamdaAnnotation().region(), function.getLamdaAnnotation().role(),
-                        function.getLamdaAnnotation().timeOut(), function.getLamdaAnnotation().memorySize());
+                        function.getLamdaAnnotation().region(), function.getLamdaAnnotation().timeOut(),
+                        function.getLamdaAnnotation().memorySize());
                 jarUploader.uploadFunction();
 
 

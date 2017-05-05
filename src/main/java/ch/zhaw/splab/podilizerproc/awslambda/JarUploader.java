@@ -15,14 +15,13 @@ class JarUploader {
     private int timeout;
     private int memorySize;
 
-    JarUploader(String functionName, String zipFile, String handler,String region, String role, int timeout, int memorySize) {
+    JarUploader(String functionName, String zipFile, String handler,String region, int timeout, int memorySize) {
         this.functionName = functionName;
         this.zipFile = zipFile;
         this.handler = handler;
         this.timeout = timeout;
         this.memorySize = memorySize;
         this.region = region;
-        this.role = role;
     }
 
     /**
@@ -41,6 +40,11 @@ class JarUploader {
                     BufferedReader outErrors = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     String lineError = null;
                     try {
+                        if (command.startsWith("aws sts")){
+                            //System.out.println("\n\naws sts output: " + input.readLine() + "\n\n");
+                            role = "arn:aws:iam::" + input.readLine() + ":role/lambda_basic_execution";
+                            return;
+                        }
                         while ((line = input.readLine()) != null)
                             System.out.println(line);
                         while ((lineError = outErrors.readLine()) != null) {
@@ -89,10 +93,15 @@ class JarUploader {
         return result;
     }
 
+    private String getRoleCommand(){
+        return "aws sts get-caller-identity --output text --query Account";
+    }
+
     /**
      * Creates Lambda Function on AWS and uploads the source code jar
      */
     void uploadFunction() {
+        writeIntoCMD(getRoleCommand());
         writeIntoCMD(getDeleteCommand());
         writeIntoCMD(getCommand());
     }

@@ -12,8 +12,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Lambda {
     String region() default "us-west-2";
-    // TODO: 4/28/17 generate iam
-    String role() default "arn:aws:iam::520974061566:role/lambda_basic_execution";
     int timeOut() default 60;
     int memorySize() default 1024;
 }
