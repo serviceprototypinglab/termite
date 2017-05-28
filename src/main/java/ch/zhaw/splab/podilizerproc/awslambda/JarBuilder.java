@@ -43,7 +43,7 @@ public class JarBuilder {
 
         Invoker invoker = new DefaultInvoker();
         try {
-            if (invoker.getMavenHome() == null){
+            if (invoker.getMavenHome() == null) {
                 invoker.setMavenHome(new File("/usr/share/maven/"));
             }
             //log the build output to file
@@ -54,7 +54,7 @@ public class JarBuilder {
             InvocationResult result = invoker.execute(request);
             printBuildResult(path, result.getExitCode());
             printStream.close();
-            if (result.getExitCode() == 0){
+            if (result.getExitCode() == 0) {
                 return path;
             }
         } catch (MavenInvocationException e) {
@@ -65,7 +65,7 @@ public class JarBuilder {
         return null;
     }
 
-    private void printBuildResult(String path, int exitCode){
+    private void printBuildResult(String path, int exitCode) {
         String result = "Build result of project " + path + " : ";
         if (exitCode == 0) {
             result += "[SUCCESS]";

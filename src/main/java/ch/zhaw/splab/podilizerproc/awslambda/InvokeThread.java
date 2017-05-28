@@ -71,9 +71,9 @@ public class InvokeThread extends Thread {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
-            outObj = objectMapper.readValue(byteBufferToString( lambdaClient.invoke(invokeRequest).getPayload(),
+            outObj = objectMapper.readValue(byteBufferToString(lambdaClient.invoke(invokeRequest).getPayload(),
                     Charset.forName("UTF-8")), outClazz);
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Function " + method.getName() + " is unreachable. Processing locally...");
             try {
@@ -95,31 +95,36 @@ public class InvokeThread extends Thread {
             e.printStackTrace();
         }
     }
+
     /**
      * Generates package name for input type based on method signature
+     *
      * @param method is method signature object
      * @return {@link String} package name of InputType
      */
-    private String getInputPackage(Method method){
+    private String getInputPackage(Method method) {
         String fullClassName = method.getDeclaringClass().getName();
-        return  "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".InputType";
+        return "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".InputType";
     }
+
     /**
      * Generates package name for output type based on method signature
+     *
      * @param method is method signature object
      * @return {@link String} package name of OutputType
      */
-    private String getOutputPackage(Method method){
+    private String getOutputPackage(Method method) {
         String fullClassName = method.getDeclaringClass().getName();
-        return  "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".OutputType";
+        return "aws." + fullClassName + "." + method.getName() + method.getParameterCount() + ".OutputType";
     }
 
     /**
      * Generates function name for annotated method over the load process
+     *
      * @param method is annotated method to generate lambda function name for
      * @return {@link String} name of format 'package_class_method_#argsNumber'
      */
-    private String getFunctionName(Method method){
+    private String getFunctionName(Method method) {
         String result = method.getDeclaringClass().getName().replace('.', '_');
         result += "_" + method.getName();
         result += method.getParameterCount();

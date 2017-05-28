@@ -15,7 +15,7 @@ class JarUploader {
     private int timeout;
     private int memorySize;
 
-    JarUploader(String functionName, String zipFile, String handler,String region, int timeout, int memorySize) {
+    JarUploader(String functionName, String zipFile, String handler, String region, int timeout, int memorySize) {
         this.functionName = functionName;
         this.zipFile = zipFile;
         this.handler = handler;
@@ -40,7 +40,7 @@ class JarUploader {
                     BufferedReader outErrors = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     String lineError = null;
                     try {
-                        if (command.startsWith("aws sts")){
+                        if (command.startsWith("aws sts")) {
                             //System.out.println("\n\naws sts output: " + input.readLine() + "\n\n");
                             role = "arn:aws:iam::" + input.readLine() + ":role/lambda_basic_execution";
                             return;
@@ -93,7 +93,7 @@ class JarUploader {
         return result;
     }
 
-    private String getRoleCommand(){
+    private String getRoleCommand() {
         return "aws sts get-caller-identity --output text --query Account";
     }
 

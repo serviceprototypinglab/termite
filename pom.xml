@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>ch.zhaw.splab.servicetooling</groupId>
-    <artifactId>PodilizerProc</artifactId>
+    <artifactId>Termite</artifactId>
     <version>0.1</version>
 
     <properties>

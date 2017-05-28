@@ -12,7 +12,7 @@ public class OutputTypeEntity extends PoJoEntity {
         super(className);
         fields.add(new Pair<>("String", "defaultReturn"));
         fields.add(new Pair<>("long", "time"));
-        if (!returnType.toString().equals("void")){
+        if (!returnType.toString().equals("void")) {
             fields.add(new Pair<>(returnType.toString(), "result"));
         }
     }

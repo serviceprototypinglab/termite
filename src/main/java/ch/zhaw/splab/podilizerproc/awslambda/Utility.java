@@ -7,6 +7,7 @@ import java.util.List;
 public class Utility {
     /**
      * Replace the first letter of input string to the same uppercase letter
+     *
      * @param string is input String to translation
      * @return input string with first letter to upper case
      */
@@ -19,9 +20,10 @@ public class Utility {
 
     /**
      * Selects fields that need to be added to lambda function class
+     *
      * @return fields as {@link String} of of java code to be included;
      */
-    public static String fieldsToString(List<VariableTree> fields){
+    public static String fieldsToString(List<VariableTree> fields) {
         StringBuilder result = new StringBuilder();
         for (VariableTree field :
                 fields) {

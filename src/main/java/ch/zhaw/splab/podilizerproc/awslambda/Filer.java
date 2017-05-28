@@ -21,31 +21,33 @@ public class Filer {
 
     /**
      * Creates directory tree for certain lambda function
+     *
      * @return true if tree created and false if not
      */
-    public boolean createDirectories(){
+    public boolean createDirectories() {
         File directories = new File(getPath().toString());
         return directories.mkdirs();
     }
 
     /**
      * Generates path for certain lambda function based on package name, class name, method name and parameters number
+     *
      * @return {@link Path} of generated path
      */
-    public Path getPath(){
+    public Path getPath() {
         String packageName;
         String clazzName;
         String methodSpec;
 
-        if (cu.getPackageName() == null){
-            packageName =  "aws";
+        if (cu.getPackageName() == null) {
+            packageName = "aws";
         } else {
             packageName = "aws/" + cu.getPackageName().toString().replace(',', '/');
         }
 
         clazzName = clazz.getSimpleName().toString();
         int params;
-        if (method.getParameters() == null){
+        if (method.getParameters() == null) {
             params = 0;
         } else {
             params = method.getParameters().size();
@@ -55,24 +57,26 @@ public class Filer {
         return Paths.get(packageName + "/" + clazzName + "/" + methodSpec + "/src/main/java/");
     }
     // TODO: 4/3/17 optimize get paths methods
+
     /**
      * Generates path for certain lambda function based on package name, class name, method name and parameters number
+     *
      * @return {@link Path} of generated path
      */
-    public Path getPomPath(){
+    public Path getPomPath() {
         String packageName;
         String clazzName;
         String methodSpec;
 
-        if (cu.getPackageName() == null){
-            packageName =  "aws";
+        if (cu.getPackageName() == null) {
+            packageName = "aws";
         } else {
             packageName = "aws/" + cu.getPackageName().toString().replace(',', '/');
         }
 
         clazzName = clazz.getSimpleName().toString();
         int params;
-        if (method.getParameters() == null){
+        if (method.getParameters() == null) {
             params = 0;
         } else {
             params = method.getParameters().size();

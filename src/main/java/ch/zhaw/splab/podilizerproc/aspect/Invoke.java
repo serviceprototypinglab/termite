@@ -13,7 +13,7 @@ public class Invoke {
 
     @Around("@annotation(lambda)")
     public Object anyExec(ProceedingJoinPoint joinPoint,
-                        ch.zhaw.splab.podilizerproc.annotations.Lambda lambda) throws Throwable {
+                          ch.zhaw.splab.podilizerproc.annotations.Lambda lambda) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 

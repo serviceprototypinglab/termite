@@ -3,7 +3,6 @@ package ch.zhaw.splab.podilizerproc.awslambda;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 public class AwsCredentialsReader {
     private String awsAccessKeyId;

@@ -12,6 +12,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Lambda {
     String region() default "us-west-2";
+
     int timeOut() default 60;
+
     int memorySize() default 1024;
 }

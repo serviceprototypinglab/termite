@@ -29,6 +29,7 @@ public class LambdaProcessor extends AbstractProcessor {
 
     /**
      * Initialization of {@link ProcessEnvironment} object and {@link Trees} object
+     *
      * @param processingEnv
      */
     @Override
@@ -39,11 +40,12 @@ public class LambdaProcessor extends AbstractProcessor {
     }
 
 
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {;
+    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        ;
         List<LambdaFunction> functions = new ArrayList<>();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
-        if (annotatedMethods.size() == 0){
+        if (annotatedMethods.size() == 0) {
             return true;
         }
 
@@ -82,20 +84,8 @@ public class LambdaProcessor extends AbstractProcessor {
             }
 
         }
-        //messager.printMessage(Diagnostic.Kind.NOTE, "Annotated methods: " + functions.size());
         Functions functionsWriter = new Functions(functions);
         functionsWriter.write();
-
-
-
-//        for (CompilationUnitTree cu:
-//             cuList) {
-//            messager.printMessage(Diagnostic.Kind.NOTE, "cu " + cu.getPackageName() + " - imports - \n" +
-//                    cu.getImports());
-//        }
-//        //messager.printMessage(Diagnostic.Kind.NOTE, "Classes are " + Arrays.toString(classes.toArray()));
-
-
         return true;
     }
 
@@ -133,6 +123,7 @@ public class LambdaProcessor extends AbstractProcessor {
     private class TypeScanner extends TreePathScanner {
         private List<ClassTree> classes = new ArrayList<>();
         private ClassTree clazz = null;
+
         @Override
         public Object visitClass(ClassTree classTree, Object o) {
             classes.add(classTree);
@@ -148,12 +139,14 @@ public class LambdaProcessor extends AbstractProcessor {
             return clazz;
         }
     }
+
     /**
      * Compilation Unit visitor
      */
-    private class CUVisitor extends SimpleTreeVisitor{
+    private class CUVisitor extends SimpleTreeVisitor {
         private List<CompilationUnitTree> cuList = new ArrayList<>();
         private CompilationUnitTree cu = null;
+
         @Override
         public Object visitCompilationUnit(CompilationUnitTree compilationUnitTree, Object o) {
             cuList.add(compilationUnitTree);
@@ -172,12 +165,13 @@ public class LambdaProcessor extends AbstractProcessor {
 
     /**
      * Gives the most external class owner of the code structure
+     *
      * @param element is {@link Element} object to find external class of
      * @return {@link TypeElement} object of the most external type
      */
-    private TypeElement getMostExternalType(Element element){
-        if (element.getKind().isClass() & !element.getEnclosingElement().getKind().isClass()){
-            return (TypeElement)element;
+    private TypeElement getMostExternalType(Element element) {
+        if (element.getKind().isClass() & !element.getEnclosingElement().getKind().isClass()) {
+            return (TypeElement) element;
         }
         Element parent = element;
         Element grandParent;
@@ -185,8 +179,8 @@ public class LambdaProcessor extends AbstractProcessor {
             parent = parent.getEnclosingElement();
             grandParent = parent.getEnclosingElement();
         } while (!(parent.getKind().isClass() & !grandParent.getKind().isClass() &
-        !grandParent.getKind().isInterface()));
-        return (TypeElement)parent;
+                !grandParent.getKind().isInterface()));
+        return (TypeElement) parent;
 
     }
 

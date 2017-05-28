@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * PoJo class entity for input type
  */
-public class InputTypeEntity extends PoJoEntity{
+public class InputTypeEntity extends PoJoEntity {
 
     public InputTypeEntity(String className, List<? extends VariableTree> params) {
         super(className);
