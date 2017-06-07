@@ -4,6 +4,12 @@ podilizer_annotations_lib.iml
 .idea/dictionaries/~.xml
 .idea/libraries/~.xml
 .idea/
+example/out/
+example/out
+example/target/
+example/target
+example/aws/
+example/aws
 out/
 out
 target/

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>doc-examples</groupId>
+  <artifactId>lambda-java</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>lambda-java-example</name>
+
+  <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.source-target.version>1.8</java.source-target.version>
+        <aspectj.version>1.8.10</aspectj.version>
+        <main-class>app.Test</main-class>
+  </properties>
+
+  
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>2.2.4</version>
+                    <executions>
+                        <execution>
+                            <id>process</id>
+                            <goals>
+                                 <goal>process</goal>
+                            </goals>
+                            <phase>process-sources</phase>
+                            <configuration>
+                                <proc>none</proc>
+                                <processors>
+                                    <processor>ch.zhaw.splab.podilizerproc.annotations.LambdaProcessor
+                                    </processor>
+                                </processors>
+                            </configuration>
+                        </execution>
+                    </executions>
+            </plugin>
+              <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <id>run-java</id>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>java</executable>
+                    <classpathScope>runtime</classpathScope>
+                    <arguments>
+                        <argument>-javaagent:${settings.localRepository}/org/aspectj/aspectjweaver/${aspectj.version}/aspectjweaver-${aspectj.version}.jar</argument>
+                        <argument>-classpath</argument>
+                        <classpath />
+                        <argument>${main-class}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+  <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>ch.zhaw.splab.servicetooling</groupId>
+                <artifactId>PodilizerProc</artifactId>
+                <version>0.1</version>
+            </dependency>
+        </dependencies>
+  </dependencyManagement>  
+
+  <dependencies>
+        <dependency>
+            <groupId>ch.zhaw.splab.servicetooling</groupId>
+            <artifactId>PodilizerProc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.aspectj</groupId>
+           <artifactId>aspectjweaver</artifactId>
+           <version>${aspectj.version}</version>
+           <scope>runtime</scope>
+        </dependency>
+  </dependencies>
+</project>

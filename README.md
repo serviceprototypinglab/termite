@@ -1,5 +1,5 @@
 ## Overview
-Termite is another research project of "Lambdalizing" process after
+Termite is another research project of "Lambdafication" process after
  [Podilizer](https://github.com/serviceprototypinglab/podilizer) in scope of Service Tooling initiative.
  We developed the library which would take care of automatic Lambda functions generating based on the the written
  code. This library could be used both in existing projects and in developing from scratch.
@@ -23,7 +23,7 @@ with particular annotations methods are already created at provider's service
 
 The invoking part of the library was implemented using java aspectj library, that allows to intercept the
 appropriate method call over the runtime phase and call already created Lambda function instead of the local method.
-Furthermore every function invocation starts in the new thread, it provide full usage of such FaaS strong feature as
+Furthermore every function invocation starts in the new thread, it provides the use of the such strength of FaaS as
 auto-scaling.
 
 
