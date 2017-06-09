@@ -68,7 +68,7 @@
         <dependencies>
             <dependency>
                 <groupId>ch.zhaw.splab.servicetooling</groupId>
-                <artifactId>PodilizerProc</artifactId>
+                <artifactId>Termite</artifactId>
                 <version>0.1</version>
             </dependency>
         </dependencies>
@@ -77,7 +77,7 @@
   <dependencies>
         <dependency>
             <groupId>ch.zhaw.splab.servicetooling</groupId>
-            <artifactId>PodilizerProc</artifactId>
+            <artifactId>Termite</artifactId>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
