@@ -12,7 +12,7 @@ public class Test{
 		System.out.println("Main method has been finished");
 	}
 
-	@Lambda()
+	@Lambda(timeOut = 60, memorySize = 512)
 	public static void testMethod(int i, int j, String s){
 		System.out.println("Lambda no." + i + "; Args sum = " + (i + j) + "; String param: " + s);
 	}
