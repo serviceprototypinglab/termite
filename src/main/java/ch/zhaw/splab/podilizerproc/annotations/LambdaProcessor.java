@@ -69,8 +69,10 @@ public class LambdaProcessor extends AbstractProcessor {
                     new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda);
             functions.add(lambdaFunction);
             try {
-                JavaFileObject inputType = processingEnv.getFiler().createSourceFile("InputType", element);
-                JavaFileObject outputType = processingEnv.getFiler().createSourceFile("OutputType", element);
+                String packageName = lambdaFunction.generateInputPackage();
+                String generatedClassPath = packageName.substring(8, packageName.length() - 1);
+                JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath +".InputType", null);
+                JavaFileObject outputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".OutputType", null);
                 Writer writer = inputType.openWriter();
                 Writer writer1 = outputType.openWriter();
                 writer.append(lambdaFunction.generateInputPackage() + "\n\n");

@@ -35,8 +35,9 @@ class JarUploader {
             final Process process = runtime.exec(command);
             new Thread(new Runnable() {
                 public void run() {
+                    boolean error = false;
                     BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                    String line = null;
+                    //String line = null;
                     BufferedReader outErrors = new BufferedReader(new InputStreamReader(process.getErrorStream()));
                     String lineError = null;
                     try {
@@ -45,10 +46,16 @@ class JarUploader {
                             role = "arn:aws:iam::" + input.readLine() + ":role/lambda_basic_execution";
                             return;
                         }
-                        while ((line = input.readLine()) != null)
-                            System.out.println(line);
+//                        while ((line = input.readLine()) != null)
+//                            System.out.println(line);
                         while ((lineError = outErrors.readLine()) != null) {
+                            if (command.startsWith("aws lambda create-function")){
+                                error = true;
+                            }
                             System.err.println(lineError);
+                        }
+                        if (command.startsWith("aws lambda create-function") && !error){
+                            System.out.println("[TERMITE]Function " + functionName + " was successfully created");
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -83,12 +90,11 @@ class JarUploader {
                 " --runtime " + runtime +
                 " --timeout " + timeout +
                 " --memory-size " + memorySize;
-        System.out.println(result);
         return result;
     }
 
     private String getDeleteCommand() {
-        String result = "sudo aws lambda delete-function " +
+        String result = "aws lambda delete-function " +
                 "--function-name " + functionName;
         return result;
     }

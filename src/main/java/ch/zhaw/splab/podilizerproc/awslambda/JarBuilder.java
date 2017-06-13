@@ -66,7 +66,7 @@ public class JarBuilder {
     }
 
     private void printBuildResult(String path, int exitCode) {
-        String result = "Build result of project " + path + " : ";
+        String result = "[TERMITE]Build result of project " + path + " : ";
         if (exitCode == 0) {
             result += "[SUCCESS]";
         } else {

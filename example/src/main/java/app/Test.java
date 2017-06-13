@@ -8,11 +8,17 @@ public class Test{
 		for (int i = 0; i < 2; i++) {
 			testMethod(i, 5, "String");
 		}
+		sum(4,5);
 		System.out.println("Main method has been finished");
 	}
 
 	@Lambda()
 	public static void testMethod(int i, int j, String s){
 		System.out.println("Lambda no." + i + "; Args sum = " + (i + j) + "; String param: " + s);
+	}
+	@Lambda()
+	public static int sum(int a1, int a2){
+		System.out.println("a1 + a2 = " + (a1 + a2));
+		return a1 + a2;
 	}
 }

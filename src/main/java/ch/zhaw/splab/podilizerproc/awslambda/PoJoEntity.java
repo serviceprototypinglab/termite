@@ -18,9 +18,11 @@ public abstract class PoJoEntity {
         String result = "public class " + className + "{\n";
         result += generateFieldsDeclaration() + "\n";
         result += generateDefaultConstructor();
-        result += generateConstructor();
-        result += generateGetters();
-        result += generateSetters();
+        if (fields.size() != 0){
+            result += generateConstructor();
+            result += generateGetters();
+            result += generateSetters();
+        }
         result += "}";
         return result;
     }
