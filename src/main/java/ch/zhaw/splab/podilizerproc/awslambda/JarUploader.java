@@ -107,6 +107,9 @@ class JarUploader {
         String result = "aws lambda delete-function " +
                 "--region " + region + " " +
                 "--function-name " + functionName;
+        if (!endPoint.equals("")){
+            result += " --endpoint-url " + endPoint;
+        }
         return result;
     }
 
