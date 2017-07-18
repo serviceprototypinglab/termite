@@ -1,6 +1,8 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
 
+import ch.zhaw.splab.podilizerproc.statistic.Timer;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +37,7 @@ class JarUploader {
             final Process process = runtime.exec(command);
             new Thread(new Runnable() {
                 public void run() {
+                    Timer.start();
                     boolean error = false;
                     BufferedReader input = new BufferedReader(new InputStreamReader(process.getInputStream()));
                     //String line = null;
@@ -55,7 +58,9 @@ class JarUploader {
                             System.err.println(lineError);
                         }
                         if (command.startsWith("aws lambda create-function") && !error){
+                            Timer.stop();
                             System.out.println("[TERMITE]Function " + functionName + " was successfully created");
+                            System.out.println("[TERMITE]Uploading time is " + Timer.getFormatedTime());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -95,6 +100,7 @@ class JarUploader {
 
     private String getDeleteCommand() {
         String result = "aws lambda delete-function " +
+                "--region " + region + " " +
                 "--function-name " + functionName;
         return result;
     }

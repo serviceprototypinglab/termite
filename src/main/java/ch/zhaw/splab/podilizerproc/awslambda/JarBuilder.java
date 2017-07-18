@@ -1,5 +1,6 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
+import ch.zhaw.splab.podilizerproc.statistic.Timer;
 import org.apache.maven.shared.invoker.*;
 
 import java.io.File;
@@ -35,7 +36,8 @@ public class JarBuilder {
      *
      * @throws URISyntaxException
      */
-    public String mvnBuild() {
+    public String mvnBuild() {        Timer.start();
+
         InvocationRequest request = new DefaultInvocationRequest();
         request.setPomFile(new File(path));
         request.setGoals(Arrays.asList("clean", "install"));
@@ -52,7 +54,9 @@ public class JarBuilder {
             invoker.setOutputHandler(outputHandler);
 
             InvocationResult result = invoker.execute(request);
+            Timer.stop();
             printBuildResult(path, result.getExitCode());
+            System.out.println("[TERMITE]Project " + path + " is built in " + Timer.getFormatedTime());
             printStream.close();
             if (result.getExitCode() == 0) {
                 return path;
@@ -74,6 +78,5 @@ public class JarBuilder {
         }
         System.out.println(result);
     }
-
 }
 

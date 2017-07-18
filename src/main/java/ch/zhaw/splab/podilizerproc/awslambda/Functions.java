@@ -63,9 +63,6 @@ public class Functions {
                         function.getLambdaAnnotation().region(), function.getLambdaAnnotation().timeOut(),
                         function.getLambdaAnnotation().memorySize());
                 jarUploader.uploadFunction();
-
-
-
             } catch (IOException e) {
                 e.printStackTrace();
             }
