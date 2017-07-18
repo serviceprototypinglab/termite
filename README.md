@@ -1,4 +1,4 @@
-![logo](/Documentation/logo/v0_5_0.png?raw=true "logo")
+![logo](/Documentation/logo/v0_5_0.png=100x "logo")
 
 ## Overview
 Termite is another research project of "Lambdafication" process after
@@ -23,14 +23,14 @@ processors are being performed over the compilation phase. It means that after c
 with particular annotations methods are already created at provider's service
 ([AWS Lambda](https://aws.amazon.com/lambda/) as first implementation).
 
-![structure](/Documentation/diagrams/Termite_structure_simple.png?raw=true "structure")
-
 The invoking part of the library was implemented using java aspectj library, that allows to intercept the
 appropriate method call over the runtime phase and call already created Lambda function instead of the local method.
 Furthermore every function invocation starts in the new thread, it provides the use of the such strength of FaaS as
 auto-scaling.
 
-##How to
+![Structure diagram](/Documentation/diagrams/Termite_structure_simple.png?raw=true "structure")
+
+## How to
 
 Before using Termite directly from our Git repository, make sure to fulfil the following prerequisites:
 
