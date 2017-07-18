@@ -54,16 +54,24 @@ class JarUploader {
 //                        while ((line = input.readLine()) != null)
 //                            System.out.println(line);
                         while ((lineError = outErrors.readLine()) != null) {
-                            if (command.startsWith("aws lambda create-function")){
+                            if (command.startsWith("aws lambda create-function") ||
+                                    command.startsWith("aws lambda delete-function")){
                                 error = true;
                             }
+                            if (!command.startsWith("aws lambda delete-function"))
                             System.err.println(lineError);
                         }
                         if (command.startsWith("aws lambda create-function") && !error){
                             Timer.stop();
-                            System.out.println("[TERMITE]Function " + functionName + " was successfully created");
-                            System.out.println("[TERMITE]Uploading time is " + Timer.getFormatedTime());
+                            System.out.println("[TERMITE] New Lambda Function " + functionName + " was successfully created");
+                            System.out.println("[TERMITE] Uploading time is " + Timer.getFormatedTime());
                         }
+                        if (command.startsWith("aws lambda delete-function") && !error){
+                            Timer.stop();
+                            System.out.println("[TERMITE] Old function " + functionName + " was successfully deleted");
+                            System.out.println("[TERMITE] Deletion time is " + Timer.getFormatedTime());
+                        }
+                        System.out.println("\n");
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -122,6 +130,7 @@ class JarUploader {
      */
     void uploadFunction() {
         writeIntoCMD(getRoleCommand());
+        Timer.start();
         writeIntoCMD(getDeleteCommand());
         writeIntoCMD(getCommand());
     }

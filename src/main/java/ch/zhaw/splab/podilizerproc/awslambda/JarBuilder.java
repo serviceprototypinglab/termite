@@ -56,7 +56,7 @@ public class JarBuilder {
             InvocationResult result = invoker.execute(request);
             Timer.stop();
             printBuildResult(path, result.getExitCode());
-            System.out.println("[TERMITE]Project " + path + " is built in " + Timer.getFormatedTime());
+            System.out.println("[TERMITE] Project " + path + " has been built in " + Timer.getFormatedTime());
             printStream.close();
             if (result.getExitCode() == 0) {
                 return path;
@@ -70,7 +70,7 @@ public class JarBuilder {
     }
 
     private void printBuildResult(String path, int exitCode) {
-        String result = "[TERMITE]Build result of project " + path + " : ";
+        String result = "[TERMITE] Build result of project " + path + " : ";
         if (exitCode == 0) {
             result += "[SUCCESS]";
         } else {
