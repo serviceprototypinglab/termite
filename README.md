@@ -1,5 +1,5 @@
 
-<img src="/Documentation/logo/v0_5_0.png" width="100" height="150">
+<img src="/Documentation/logo/v0_5_0.png" width="150" height="100">
 
 ## Overview
 Termite is another research project of "Lambdafication" process after
