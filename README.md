@@ -1,5 +1,5 @@
-![logo](/Documentation/logo/v0_5_0.png=100x "logo")
-
+![logo](/Documentation/logo/v0_5_0.png?raw=true "logo")
+<img src="/Documentation/logo/v0_5_0.png" width="100" height="100">
 ## Overview
 Termite is another research project of "Lambdafication" process after
  [Podilizer](https://github.com/serviceprototypinglab/podilizer) in scope of Service Tooling initiative.
