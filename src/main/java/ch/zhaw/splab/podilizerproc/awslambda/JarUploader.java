@@ -14,16 +14,18 @@ class JarUploader {
     private String functionName;
     private String zipFile;
     private String handler;
+    private String endPoint;
     private int timeout;
     private int memorySize;
 
-    JarUploader(String functionName, String zipFile, String handler, String region, int timeout, int memorySize) {
+    JarUploader(String functionName, String zipFile, String handler, String region, int timeout, int memorySize, String endPoint) {
         this.functionName = functionName;
         this.zipFile = zipFile;
         this.handler = handler;
         this.timeout = timeout;
         this.memorySize = memorySize;
         this.region = region;
+        this.endPoint = endPoint;
     }
 
     /**
@@ -95,6 +97,9 @@ class JarUploader {
                 " --runtime " + runtime +
                 " --timeout " + timeout +
                 " --memory-size " + memorySize;
+        if (!endPoint.equals("")){
+            result += " --endpoint-url " + endPoint;
+        }
         return result;
     }
 

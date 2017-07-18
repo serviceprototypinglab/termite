@@ -61,7 +61,7 @@ public class Functions {
                         function.getAwsFiler().getPomPath().toString() + "/target/lambda-java-1.0-SNAPSHOT.jar",
                         "LambdaFunction::handleRequest",
                         function.getLambdaAnnotation().region(), function.getLambdaAnnotation().timeOut(),
-                        function.getLambdaAnnotation().memorySize());
+                        function.getLambdaAnnotation().memorySize(), function.getLambdaAnnotation().endPoint());
                 jarUploader.uploadFunction();
             } catch (IOException e) {
                 e.printStackTrace();

@@ -11,7 +11,7 @@ public class Test{
 		sum(4,5);
 		System.out.println("Main method has been finished");
 	}
-
+	//endpoint defining is possible, format: endPoint = "http://<hostname>/"(or "https://<hostname>/")
 	@Lambda(timeOut = 60, memorySize = 512)
 	public static void testMethod(int i, int j, String s){
 		System.out.println("Lambda no." + i + "; Args sum = " + (i + j) + "; String param: " + s);

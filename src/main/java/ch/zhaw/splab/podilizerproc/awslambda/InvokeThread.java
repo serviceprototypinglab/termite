@@ -51,6 +51,10 @@ public class InvokeThread extends Thread {
         AWSLambdaClient lambdaClient = new AWSLambdaClient(credentials);
         lambdaClient.setRegion(region);
 
+        if (!lambda.endPoint().equals("")){
+            lambdaClient.setEndpoint(lambda.endPoint());
+        }
+
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
