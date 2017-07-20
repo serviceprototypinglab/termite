@@ -228,8 +228,9 @@ public class LambdaFunction {
         String result = "";
         if (cu.getPackageName() != null){
             result += cu.getPackageName().toString().replace('.', '_');
+            result += "_";
         }
-        result += "_" + clazz.getSimpleName();
+        result += clazz.getSimpleName();
         result += "_" + method.getName().toString();
         if (method.getParameters() != null){
             result += method.getParameters().size();
