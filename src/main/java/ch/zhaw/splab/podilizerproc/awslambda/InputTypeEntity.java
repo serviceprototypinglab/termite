@@ -1,8 +1,8 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
 import com.sun.source.tree.VariableTree;
-import javafx.util.Pair;
 
+import java.util.AbstractMap;
 import java.util.List;
 
 /**
@@ -14,7 +14,7 @@ public class InputTypeEntity extends PoJoEntity {
         super(className);
         for (VariableTree var :
                 params) {
-            fields.add(new Pair<>(var.getType().toString(), var.getName().toString()));
+            fields.add(new AbstractMap.SimpleEntry<String, String>(var.getType().toString(), var.getName().toString()));
         }
     }
 }

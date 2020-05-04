@@ -1,13 +1,13 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
-import javafx.util.Pair;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class PoJoEntity {
     private String className;
-    protected List<Pair<String, String>> fields;
+    protected List<AbstractMap.SimpleEntry<String, String>> fields;
 
     public PoJoEntity(String className) {
         this.className = className;
@@ -46,7 +46,7 @@ public abstract class PoJoEntity {
         String result = "\tpublic " + className + "(";
         String constructorBody = "";
         int i = 0;
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             String var = entry.getKey() + " " + entry.getValue();
             if (i == 0) {
                 result += var;
@@ -67,7 +67,7 @@ public abstract class PoJoEntity {
      */
     private String generateGetters() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tpublic " + entry.getKey() + " get" +
                     Utility.firstLetterToUpperCase(entry.getValue() + "(){\n" +
                             "\t\treturn " + entry.getValue() + ";\n\t}\n");
@@ -82,7 +82,7 @@ public abstract class PoJoEntity {
      */
     private String generateSetters() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tpublic void set" + Utility.firstLetterToUpperCase(entry.getValue() +
                     "(" + entry.getKey() + " " + entry.getValue() + "){\n" +
                     "\t\tthis." + entry.getValue() + " = " + entry.getValue() + ";\n\t}\n");
@@ -97,7 +97,7 @@ public abstract class PoJoEntity {
      */
     private String generateFieldsDeclaration() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tprivate " + entry.getKey() + " " + entry.getValue() + ";\n";
         }
         return result;
