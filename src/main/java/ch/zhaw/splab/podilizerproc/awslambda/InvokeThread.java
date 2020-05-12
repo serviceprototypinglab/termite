@@ -12,10 +12,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aspectj.lang.ProceedingJoinPoint;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 public class InvokeThread extends Thread {
     private Method method;
@@ -59,15 +61,16 @@ public class InvokeThread extends Thread {
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
         try {
-            Object inputObj = inClazz.getConstructors()[0].newInstance(joinPoint.getArgs());
+            Constructor<Object> correctCtor = null;
+            for (Constructor<Object> constructor : inClazz.getConstructors()) {
+                if (constructor.getParameterCount() == joinPoint.getArgs().length) {
+                    correctCtor = constructor;
+                    break;
+                }
+            }
+            Object inputObj = correctCtor.newInstance(joinPoint.getArgs());
             json = objectMapper.writeValueAsString(inputObj);
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | JsonProcessingException e) {
             e.printStackTrace();
         }
         Object outObj = null;

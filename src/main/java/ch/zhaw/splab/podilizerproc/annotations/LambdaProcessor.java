@@ -81,6 +81,8 @@ public class LambdaProcessor extends AbstractProcessor {
                 writer1.append(lambdaFunction.createOutputType());
                 writer.flush();
                 writer1.flush();
+                writer.close();
+                writer1.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

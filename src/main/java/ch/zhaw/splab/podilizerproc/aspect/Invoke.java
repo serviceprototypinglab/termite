@@ -14,6 +14,7 @@ public class Invoke {
     @Around("@annotation(lambda)")
     public Object anyExec(ProceedingJoinPoint joinPoint,
                           ch.zhaw.splab.podilizerproc.annotations.Lambda lambda) throws Throwable {
+        System.out.println("[TERMITE] Annotation invoked");
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
 
