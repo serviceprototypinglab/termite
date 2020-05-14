@@ -10,7 +10,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.source-target.version>14</java.source-target.version>
+        <java.source-target.version>11</java.source-target.version>
         <aspectj.version>1.9.5</aspectj.version>
     </properties>
 

@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 
 class JarUploader {
     private String region;
-    private String runtime = "java8";
+    private String runtime = "java11";
     private String role;
     private String functionName;
     private String zipFile;
