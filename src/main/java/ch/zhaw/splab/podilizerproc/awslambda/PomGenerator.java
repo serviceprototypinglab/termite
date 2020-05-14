@@ -79,8 +79,8 @@ public class PomGenerator {
         List<Dependency> dependencies = new ArrayList<>();
         String[][] dependenciesAtributes =
                 {{"com.amazonaws", "aws-lambda-java-core", "1.1.0"},
-                        {"com.amazonaws", "aws-java-sdk-lambda", "1.11.774"},
-                        {"org.aspectj", "aspectjrt", "1.9.5"},
+                        {"com.amazonaws", "aws-java-sdk-lambda", "1.11.60"},
+                        {"org.aspectj", "aspectjrt", "1.8.2"},
                         {"com.googlecode.json-simple", "json-simple", "1.1"},
                         {"com.fasterxml.jackson.core", "jackson-annotations", "2.8.5"}};
         for (int i = 0; i < dependenciesAtributes.length; i++) {
