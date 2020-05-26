@@ -4,10 +4,14 @@ package ch.zhaw.splab.podilizerproc.aspect;
 import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import ch.zhaw.splab.podilizerproc.awslambda.AwsCredentialsReader;
 import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
+import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClient;
+import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,13 +57,18 @@ public class Invoke {
         String functionName = getFunctionName(method);
 
         AWSCredentials credentials = new BasicAWSCredentials(awsAccessKeyId, awsSecretKeyAccessKey);
-        Region region = Region.getRegion(Regions.fromName(regionName));
-        AWSLambdaClient lambdaClient = new AWSLambdaClient(credentials);
-        lambdaClient.setRegion(region);
+        Regions region = Regions.fromName(regionName);
+
+
+        AWSLambdaClientBuilder clientBuilder = AWSLambdaClientBuilder
+                .standard()
+                .withCredentials(new AWSStaticCredentialsProvider(credentials))
+                .withRegion(region);
 
         if (!lambda.endPoint().equals("")){
-            lambdaClient.setEndpoint(lambda.endPoint());
+            clientBuilder = clientBuilder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(lambda.endPoint(), regionName));
         }
+        AWSLambda awsLambda = clientBuilder.build();
 
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
@@ -84,7 +93,7 @@ public class Invoke {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
-            outObj = objectMapper.readValue(byteBufferToString(lambdaClient.invoke(invokeRequest).getPayload(),
+            outObj = objectMapper.readValue(byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(),
                     StandardCharsets.UTF_8), outClazz);
 
             Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getReturnType();
