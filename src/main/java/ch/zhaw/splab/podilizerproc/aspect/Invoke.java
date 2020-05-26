@@ -20,7 +20,9 @@ public class Invoke {
 
         InvokeThread invokeThread = new InvokeThread(method, lambda, joinPoint);
         invokeThread.start();
-        return null;
+
+        // TODO try catch arround this get with fallback
+        return invokeThread.getLambdaResult().get();
     }
 
 }

@@ -18,11 +18,14 @@ import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 public class InvokeThread extends Thread {
     private Method method;
     private Lambda lambda;
     private ProceedingJoinPoint joinPoint;
+
+    private final CompletableFuture<Object> lambdaResult = new CompletableFuture<>();
 
     public InvokeThread(Method method, Lambda lambda, ProceedingJoinPoint joinPoint) {
         super();
@@ -74,22 +77,28 @@ public class InvokeThread extends Thread {
             e.printStackTrace();
         }
         Object outObj = null;
+        Object methodResult = null;
+
         try {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
             outObj = objectMapper.readValue(byteBufferToString(lambdaClient.invoke(invokeRequest).getPayload(),
                     Charset.forName("UTF-8")), outClazz);
+            outObj.getClass().getD
+            methodResult = outObj.getClass().getDeclaredMethod("getResult").invoke(outObj);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Function " + method.getName() + " is unreachable. Processing locally...");
             try {
-                Object tmp = joinPoint.proceed();
+                methodResult = joinPoint.proceed(joinPoint.getArgs());
             } catch (Throwable throwable) {
                 throwable.printStackTrace();
             }
-
         }
+        System.out.println("Continuing with result: " + methodResult);
+        lambdaResult.complete(methodResult);
+
         try {
             String functionReport = "Thread of Function " + method.getName() + " invocation was finished. " +
                     "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
@@ -98,11 +107,7 @@ public class InvokeThread extends Thread {
                 functionReport += "; Return value is: " + outObj.getClass().getDeclaredMethod("getResult", null).invoke(outObj);
             }
             System.out.println(functionReport);
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
     }
@@ -151,5 +156,9 @@ public class InvokeThread extends Thread {
             buffer.get(bytes);
         }
         return new String(bytes, charset);
+    }
+
+    public CompletableFuture<Object> getLambdaResult() {
+        return lambdaResult;
     }
 }
