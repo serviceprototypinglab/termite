@@ -11,12 +11,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.reflect.MethodSignature;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
@@ -84,9 +86,13 @@ public class InvokeThread extends Thread {
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
             outObj = objectMapper.readValue(byteBufferToString(lambdaClient.invoke(invokeRequest).getPayload(),
-                    Charset.forName("UTF-8")), outClazz);
-            outObj.getClass().getD
-            methodResult = outObj.getClass().getDeclaredMethod("getResult").invoke(outObj);
+                    StandardCharsets.UTF_8), outClazz);
+
+            Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getReturnType();
+            if (!returnType.equals(void.class)) {
+                // GetResult is only generated for non void methods
+                methodResult = outObj.getClass().getDeclaredMethod("getResult").invoke(outObj);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Function " + method.getName() + " is unreachable. Processing locally...");
