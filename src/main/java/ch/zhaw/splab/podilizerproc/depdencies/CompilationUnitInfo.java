@@ -1,15 +1,12 @@
 package ch.zhaw.splab.podilizerproc.depdencies;
 
 import javax.tools.JavaFileObject;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class CompilationUnitInfo {
 
     private final String name;
-    private final List<String> allImports = new ArrayList<>();
+    private final Set<String> importedPackages = new HashSet<>();
     private JavaFileObject sourceFile = null;
     // List of impports
     // Src file reference
@@ -19,11 +16,11 @@ public class CompilationUnitInfo {
     }
 
     public void addImport(String importName) {
-        allImports.add(importName);
+        importedPackages.add(importName);
     }
 
-    public void addImports(List<String> importNames) {
-        allImports.addAll(importNames);
+    public void addImports(Collection<String> importNames) {
+        importedPackages.addAll(importNames);
     }
 
     public void setSourceFile(JavaFileObject sourceFile) {
@@ -34,8 +31,8 @@ public class CompilationUnitInfo {
         return name;
     }
 
-    public List<String> getAllImports() {
-        return allImports;
+    public Set<String> getAllImportedPackages() {
+        return importedPackages;
     }
 
     public JavaFileObject getSourceFile() {

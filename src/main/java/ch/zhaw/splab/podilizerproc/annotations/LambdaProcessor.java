@@ -3,23 +3,28 @@ package ch.zhaw.splab.podilizerproc.annotations;
 import ch.zhaw.splab.podilizerproc.awslambda.Functions;
 import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
 import ch.zhaw.splab.podilizerproc.depdencies.DependencyResolver;
-import com.sun.source.tree.*;
+import com.sun.source.tree.ClassTree;
+import com.sun.source.tree.CompilationUnitTree;
+import com.sun.source.tree.MethodTree;
 import com.sun.source.util.SimpleTreeVisitor;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
 
-import javax.annotation.processing.*;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Processor of {@link Lambda} annotation
@@ -52,6 +57,7 @@ public class LambdaProcessor extends AbstractProcessor {
         if (annotatedMethods.size() == 0) {
             return true;
         }
+        DependencyResolver dependencyResolver = new DependencyResolver(trees, roundEnv);
 
         for (Element element :
                 annotatedMethods) {
@@ -59,30 +65,8 @@ public class LambdaProcessor extends AbstractProcessor {
             TypeScanner typeScanner = new TypeScanner();
             CUVisitor cuVisitor = new CUVisitor();
 
-            //TODO: Find and package non primitive types.
-            ExecutableType emeth = (ExecutableType)element.asType();
-            // 1. Passed parameters
-            // 2. Return parameters
-            // 3. locally used types. (Hardest)
-            for (TypeMirror parameterType : emeth.getParameterTypes()) {
-                Element paramElem = typeUtils.asElement(parameterType);
-                System.out.println("Paramter: " + parameterType);
-                System.out.println(paramElem);
-                if (paramElem != null) {
-                    TreePath paramTree = trees.getPath(paramElem);
-                    TypeScanner paramTypeScanner = new TypeScanner();
-                    paramTypeScanner.scan(paramTree, trees);
-                    System.out.println("tree:");
-                    System.out.println(paramTree);
-                    System.out.println("Scanned:");
-                    System.out.println(paramTypeScanner.getClazz());
-                }
-            }
-
-            //Element element1 = typeUtils.asElement(parameterType);
 
             System.out.println("###############################################################");
-            DependencyResolver dependencyResolver = new DependencyResolver(trees, typeUtils, roundEnv);
             dependencyResolver.resolveDependencies(element);
             System.out.println("###############################################################");
 
@@ -94,19 +78,13 @@ public class LambdaProcessor extends AbstractProcessor {
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
 
-            System.out.println("Class: ");
-            System.out.println(typeScanner.getClazz());
-
-            System.out.println("Cu:");
-            System.out.println(cuVisitor.getCu());
-
 
             Lambda lambda = element.getAnnotation(Lambda.class);
             LambdaFunction lambdaFunction =
                     new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda);
             functions.add(lambdaFunction);
-            try {
-                String packageName = lambdaFunction.generateInputPackage();
+            /*try {
+                /*String packageName = lambdaFunction.generateInputPackage();
                 String generatedClassPath = packageName.substring(8, packageName.length() - 1);
                 JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath +".InputType", null);
                 JavaFileObject outputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".OutputType", null);
@@ -122,7 +100,7 @@ public class LambdaProcessor extends AbstractProcessor {
                 writer1.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            }
+            }*/
 
         }
         Functions functionsWriter = new Functions(functions);
