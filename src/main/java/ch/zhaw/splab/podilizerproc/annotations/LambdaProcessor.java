@@ -2,6 +2,7 @@ package ch.zhaw.splab.podilizerproc.annotations;
 
 import ch.zhaw.splab.podilizerproc.awslambda.Functions;
 import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
+import ch.zhaw.splab.podilizerproc.depdencies.DependencyResolver;
 import com.sun.source.tree.*;
 import com.sun.source.util.SimpleTreeVisitor;
 import com.sun.source.util.TreePath;
@@ -13,10 +14,8 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
-import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
@@ -61,12 +60,31 @@ public class LambdaProcessor extends AbstractProcessor {
             CUVisitor cuVisitor = new CUVisitor();
 
             //TODO: Find and package non primitive types.
-            // ExecutableType emeth = (ExecutableType)element.asType();
+            ExecutableType emeth = (ExecutableType)element.asType();
             // 1. Passed parameters
             // 2. Return parameters
             // 3. locally used types. (Hardest)
-            // for (TypeMirror parameterType : emeth.getParameterTypes()) {
-            //    Element element1 = typeUtils.asElement(parameterType);
+            for (TypeMirror parameterType : emeth.getParameterTypes()) {
+                Element paramElem = typeUtils.asElement(parameterType);
+                System.out.println("Paramter: " + parameterType);
+                System.out.println(paramElem);
+                if (paramElem != null) {
+                    TreePath paramTree = trees.getPath(paramElem);
+                    TypeScanner paramTypeScanner = new TypeScanner();
+                    paramTypeScanner.scan(paramTree, trees);
+                    System.out.println("tree:");
+                    System.out.println(paramTree);
+                    System.out.println("Scanned:");
+                    System.out.println(paramTypeScanner.getClazz());
+                }
+            }
+
+            //Element element1 = typeUtils.asElement(parameterType);
+
+            System.out.println("###############################################################");
+            DependencyResolver dependencyResolver = new DependencyResolver(trees, typeUtils, roundEnv);
+            dependencyResolver.resolveDependencies(element);
+            System.out.println("###############################################################");
 
 
             TreePath tp = trees.getPath(element);
@@ -75,6 +93,12 @@ public class LambdaProcessor extends AbstractProcessor {
             typeScanner.scan(ctp, trees);
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
+
+            System.out.println("Class: ");
+            System.out.println(typeScanner.getClazz());
+
+            System.out.println("Cu:");
+            System.out.println(cuVisitor.getCu());
 
 
             Lambda lambda = element.getAnnotation(Lambda.class);
