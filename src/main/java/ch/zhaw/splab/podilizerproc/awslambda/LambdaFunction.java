@@ -1,28 +1,33 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
 import ch.zhaw.splab.podilizerproc.annotations.Lambda;
+import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import com.sun.source.tree.*;
 
 import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  *Entity of the AWS lambda function
  */
 public class LambdaFunction {
-    private MethodTree method;
-    private ClassTree clazz;
-    private CompilationUnitTree cu;
-    private List<VariableTree> fields = new ArrayList<>();
-    private Filer awsFiler;
-    private Lambda lambdaAnnotation;
+    private final MethodTree method;
+    private final ClassTree clazz;
+    private final CompilationUnitTree cu;
+    private final List<VariableTree> fields = new ArrayList<>();
+    private final Filer awsFiler;
+    private final Lambda lambdaAnnotation;
+    private final Set<CompilationUnitInfo> requiredCompilationUnits;
 
-    public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu, Lambda lambdaAnnotation) {
+    public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu, Lambda lambdaAnnotation, Set<CompilationUnitInfo> requiredCompilationUnits) {
         this.method = method;
         this.clazz = clazz;
         this.cu = cu;
         this.lambdaAnnotation = lambdaAnnotation;
+        this.requiredCompilationUnits = requiredCompilationUnits;
         for (Tree tree :
                 clazz.getMembers()) {
             if (tree.getKind() == Tree.Kind.VARIABLE) {
@@ -91,14 +96,11 @@ public class LambdaFunction {
                 "com.fasterxml.jackson.databind.*",
                 "com.amazonaws.services.lambda.runtime.RequestHandler"
         };
-//        for (ImportTree importTree :
-//                cu.getImports()) {
-//            imports.add(importTree.getQualifiedIdentifier().toString());
-//        }
-        for (String importStr :
-                defaultImports) {
-            imports.add(importStr);
+        for (ImportTree importTree :
+                cu.getImports()) {
+            imports.add(importTree.getQualifiedIdentifier().toString());
         }
+        Collections.addAll(imports, defaultImports);
         return imports;
     }
 
@@ -136,6 +138,10 @@ public class LambdaFunction {
         return result + " " + extendsString + " " + implementsString + " {";
     }
 
+    public Set<CompilationUnitInfo> getRequiredCompilationUnits() {
+        return requiredCompilationUnits;
+    }
+
     /**
      * Generates handler code
      * @return {@link String} of handler java code
@@ -153,7 +159,7 @@ public class LambdaFunction {
 //            String var = field.getName().toString();
 //            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
 //        }
-        result += "\t\t" + generateMethodCall()  + ";\n";
+        result += "\t\t" + generateMethodCall();
         result += "\t\tOutputType outputType = new OutputType(\"Lambda environment\"";
         result += ", System.currentTimeMillis() - time";
         if (!method.getReturnType().toString().equals("void")){

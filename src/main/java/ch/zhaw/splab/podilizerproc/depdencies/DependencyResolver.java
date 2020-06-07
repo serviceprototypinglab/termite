@@ -47,24 +47,22 @@ public class DependencyResolver {
             String srcName = new File(cu.getSourceFile().toUri()).getName();
             srcName = srcName.replace(".java", "");
 
-            String canoncialName = pckgName + "." + srcName;
 
-            CompilationUnitInfo compilationUnitInfo = new CompilationUnitInfo(srcName);
-            compilationUnitInfo.setSourceFile(cu.getSourceFile());
-            compilationUnitInfo.addImport(pckgName);
             Set<String> allImports = cu.getImports().stream()
                     .map(ImportTree::getQualifiedIdentifier)
                     .map(Object::toString)
                     .map(completeImport -> completeImport.substring(0, completeImport.lastIndexOf('.')))
                     .collect(Collectors.toSet());
-            compilationUnitInfo.addImports(allImports);
+
+            CompilationUnitInfo compilationUnitInfo =
+                    new CompilationUnitInfo(srcName, pckgName, allImports, cu.getSourceFile());
 
             List<String> pckNames = Arrays.asList(pckgName.split("\\."));
             rootPckg.addCompilationUnit(pckNames, compilationUnitInfo);
         }
     }
 
-    public Set<JavaFileObject> resolveDependencies(Element element) {
+    public Set<CompilationUnitInfo> resolveDependencies(Element element) {
         TreePath elemPath = trees.getPath(element);
         CUVisitor cuVisitor = new CUVisitor();
         cuVisitor.visit(elemPath, trees);
@@ -84,9 +82,9 @@ public class DependencyResolver {
             System.out.println("[TERMITE] Found required dependencies for " + packageName);
             return packageInfo.getRelevantDependencies(rootPckg)
                     .stream()
-                    .map(JavaPackageInfo::getAllFiles)
+                    .map(JavaPackageInfo::getCompilationUnits)
                     .flatMap(Set::stream)
-                    .peek(javaFile -> System.out.println("Adding: " + javaFile.getName()))
+                    .peek(cu -> System.out.println("Adding: " + cu.getSourceFile().getName()))
                     .collect(Collectors.toSet());
         }
     }

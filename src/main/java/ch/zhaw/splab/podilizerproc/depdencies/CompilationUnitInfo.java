@@ -6,29 +6,23 @@ import java.util.*;
 public class CompilationUnitInfo {
 
     private final String name;
-    private final Set<String> importedPackages = new HashSet<>();
-    private JavaFileObject sourceFile = null;
-    // List of impports
-    // Src file reference
+    private final String packageName;
+    private final Set<String> importedPackages;
+    private final JavaFileObject sourceFile;
 
-    public CompilationUnitInfo(String name) {
+    public CompilationUnitInfo(String name, String packageName, Set<String> importedPackages, JavaFileObject sourceFile) {
         this.name = name;
-    }
-
-    public void addImport(String importName) {
-        importedPackages.add(importName);
-    }
-
-    public void addImports(Collection<String> importNames) {
-        importedPackages.addAll(importNames);
-    }
-
-    public void setSourceFile(JavaFileObject sourceFile) {
+        this.packageName = packageName;
+        this.importedPackages = new HashSet<>(importedPackages);
         this.sourceFile = sourceFile;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getPackageName() {
+        return packageName;
     }
 
     public Set<String> getAllImportedPackages() {

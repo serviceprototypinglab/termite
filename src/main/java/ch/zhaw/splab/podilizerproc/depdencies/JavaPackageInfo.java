@@ -1,13 +1,11 @@
 package ch.zhaw.splab.podilizerproc.depdencies;
 
-import javax.tools.JavaFileObject;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class JavaPackageInfo {
 
     private final Set<JavaPackageInfo> subpackages = new HashSet<>();
-    private final Set<CompilationUnitInfo> compliationUnits = new HashSet<>();
+    private final Set<CompilationUnitInfo> compilationUnitInfos = new HashSet<>();
 
     private final String name;
 
@@ -17,7 +15,7 @@ public class JavaPackageInfo {
 
     public void addCompilationUnit(List<String> parentPackages, CompilationUnitInfo cuInfo) {
         if (parentPackages.isEmpty()) {
-            compliationUnits.add(cuInfo);
+            compilationUnitInfos.add(cuInfo);
         } else {
             String nextPckgName = parentPackages.get(0);
             Optional<JavaPackageInfo> foundPackage = subpackages.stream()
@@ -46,10 +44,8 @@ public class JavaPackageInfo {
         return allRelevantPackageInfos;
     }
 
-    public Set<JavaFileObject> getAllFiles() {
-        return compliationUnits.stream()
-                .map(CompilationUnitInfo::getSourceFile)
-                .collect(Collectors.toSet());
+    public Set<CompilationUnitInfo> getCompilationUnits() {
+        return compilationUnitInfos;
     }
 
     private void addDependenciesToSet(JavaPackageInfo rootPckg, Set<JavaPackageInfo> relevantDependencies) {
@@ -59,7 +55,7 @@ public class JavaPackageInfo {
         // Add itself first, to avoid infinite recursion
         relevantDependencies.add(this);
         // Add all the dependencies which the contained CUs rely on
-        compliationUnits
+        compilationUnitInfos
                 .stream()
                 .flatMap(cuInfo -> cuInfo.getAllImportedPackages().stream())
                 .distinct()

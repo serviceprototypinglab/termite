@@ -2,6 +2,7 @@ package ch.zhaw.splab.podilizerproc.annotations;
 
 import ch.zhaw.splab.podilizerproc.awslambda.Functions;
 import ch.zhaw.splab.podilizerproc.awslambda.LambdaFunction;
+import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import ch.zhaw.splab.podilizerproc.depdencies.DependencyResolver;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
@@ -19,9 +20,6 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -35,7 +33,7 @@ public class LambdaProcessor extends AbstractProcessor {
     private Types typeUtils;
 
     /**
-     * Initialization of {@link ProcessEnvironment} object and {@link Trees} object
+     * Initialization.
      *
      * @param processingEnv
      */
@@ -67,7 +65,7 @@ public class LambdaProcessor extends AbstractProcessor {
 
 
             System.out.println("###############################################################");
-            dependencyResolver.resolveDependencies(element);
+            Set<CompilationUnitInfo> requiredCompilationUnits = dependencyResolver.resolveDependencies(element);
             System.out.println("###############################################################");
 
 
@@ -81,7 +79,7 @@ public class LambdaProcessor extends AbstractProcessor {
 
             Lambda lambda = element.getAnnotation(Lambda.class);
             LambdaFunction lambdaFunction =
-                    new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda);
+                    new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda, requiredCompilationUnits);
             functions.add(lambdaFunction);
 
         }
