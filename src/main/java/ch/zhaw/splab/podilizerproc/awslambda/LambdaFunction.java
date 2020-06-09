@@ -57,7 +57,6 @@ public class LambdaFunction {
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
         result += "\n" + generateHandler();
-        result += "\n" + removeAnnotations(method);
         return result + "\n}";
     }
 
@@ -101,6 +100,11 @@ public class LambdaFunction {
                 cu.getImports()) {
             imports.add(importTree.getQualifiedIdentifier().toString());
         }
+        if (cu.getPackageName() != null) {
+            // Import the target class itself, to make direct use of the annotated method
+            imports.add(cu.getPackageName().toString() + "." + clazz.getSimpleName());
+        }
+
         Collections.addAll(imports, defaultImports);
         return imports;
     }
@@ -172,36 +176,20 @@ public class LambdaFunction {
 
 
     /**
-     * Removes "@Lambda" and "@Invoker" annotations from method and adds "\t" to every string
-     *
-     * @param method to be formatted
-     * @return {@link String} of formatted method
-     */
-    private String removeAnnotations(MethodTree method) {
-        String methodString = method.toString();
-        String[] lines = methodString.split("\n");
-        StringBuilder result = new StringBuilder();
-        for (String line : lines) {
-            if (!line.startsWith("@Lambda") && !line.startsWith("@Invoker")) {
-                result.append("\t");
-                result.append(line);
-                result.append("\n");
-            }
-        }
-        return String.valueOf(result);
-    }
-
-    /**
      * Generates method call expression for lambda class
      *
      * @return java code line as {@link String}
      */
     private String generateMethodCall() {
+        // TODO: Handle non static methods by adding another field to input type containing the target object AND
+        //  another field to the output type which will contain the modified object
+        System.out.println("Class Name is: " + clazz.toString());
+        System.out.println("Simple name is: " + clazz.getSimpleName());
         String result = "";
         if (!method.getReturnType().toString().equals("void")) {
             result += "" + method.getReturnType().toString() + " result = ";
         }
-        result += method.getName().toString() + "(";
+        result += clazz.getSimpleName() + "." + method.getName().toString() + "(";
         int i = 0;
         for (VariableTree param :
                 method.getParameters()) {
