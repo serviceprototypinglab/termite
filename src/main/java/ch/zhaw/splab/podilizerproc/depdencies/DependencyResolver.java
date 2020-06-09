@@ -43,7 +43,7 @@ public class DependencyResolver {
             rootVisistor.visit(rootElemPath, trees);
             CompilationUnitTree cu = rootVisistor.getCu();
 
-            String pckgName = cu.getPackageName().toString();
+            String pckgName = cu.getPackageName() == null? "": cu.getPackageName().toString();
             String srcName = new File(cu.getSourceFile().toUri()).getName();
             srcName = srcName.replace(".java", "");
 

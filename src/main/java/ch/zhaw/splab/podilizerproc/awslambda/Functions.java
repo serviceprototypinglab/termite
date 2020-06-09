@@ -31,8 +31,10 @@ public class Functions {
                 functions) {
             try {
                 String path = function.getAwsFiler().getPath().toString();
+                System.out.println("Path is: " + path);
                 function.getAwsFiler().createDirectories();
                 File file  = new File(path + "/LambdaFunction.java");
+                System.out.println(file.getAbsolutePath());
                 PrintWriter printWriter = new PrintWriter(file);
                 printWriter.print(function.create());
                 printWriter.close();
@@ -78,13 +80,27 @@ public class Functions {
 
     private void writeRequiredCompilationUnits(String path, LambdaFunction function) {
         Set<CompilationUnitInfo> requiredCompilationUnits = function.getRequiredCompilationUnits();
-        for (CompilationUnitInfo requiredCompilationUnit : requiredCompilationUnits) {
-            String packageName = requiredCompilationUnit.getPackageName();
-            String absoluteFilePath = path + "/" + packageName.replace('.', '/');
-            JavaFileObject sourceFile = requiredCompilationUnit.getSourceFile();
+        for (CompilationUnitInfo compilationUnit : requiredCompilationUnits) {
+            String packageName = compilationUnit.getPackageName();
+            String absoluteFilePath = path + File.separatorChar + packageName.replace('.', File.separatorChar);
+            absoluteFilePath = absoluteFilePath + File.separatorChar + compilationUnit.getName() + ".java";
+            JavaFileObject sourceFile = compilationUnit.getSourceFile();
 
             File targetFile = new File(absoluteFilePath);
+            boolean wasCreated = false;
+            try {
+                targetFile.getParentFile().mkdirs();
+                wasCreated = targetFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("[TERMITE] Unable to create new source file at " + absoluteFilePath);
+                e.printStackTrace();
+                continue;
+            }
+            if (!wasCreated) {
+                System.out.println("[TERMITE] WARNING: File already exists " + absoluteFilePath);
+            }
 
+            System.out.println("[TERMITE] START WRITE " + absoluteFilePath);
             try(Reader reader = sourceFile.openReader(true);
                 BufferedReader bufferedReader = new BufferedReader(reader);
                 PrintWriter writer = new PrintWriter(targetFile)) {
