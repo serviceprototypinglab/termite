@@ -35,7 +35,6 @@ import java.util.Set;
  */
 @SupportedAnnotationTypes({"ch.zhaw.splab.podilizerproc.annotations.Lambda"})
 public class LambdaProcessor extends AbstractProcessor {
-    private static boolean LAMBDAS_PROCESSED = false;
 
     private Trees trees;
     private Types typeUtils;
@@ -48,11 +47,9 @@ public class LambdaProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        if (!LAMBDAS_PROCESSED) {
-            trees = Trees.instance(processingEnv);
-            System.out.println("[TERMITE] Annotation Proccessor init.");
-            typeUtils = processingEnv.getTypeUtils();
-        }
+        trees = Trees.instance(processingEnv);
+        System.out.println("[TERMITE] Annotation Proccessor init.");
+        typeUtils = processingEnv.getTypeUtils();
 
     }
 
@@ -60,11 +57,20 @@ public class LambdaProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         // TODO: For a normal maven compile call this class / method is called twice.
         //  This method should somehow detect if it was already run and should avoid executing twice.
+        if (roundEnv.errorRaised()) {
+            System.out.println("[TERMITE] Code not compilable, skipping processing for now...");
+            return false;
+        }
+        if (roundEnv.processingOver()) {
+            System.out.println("[TERMITE] Nothing left todo, skipping processing...");
+            return false;
+        }
+
 
         List<LambdaFunction> functions = new ArrayList<>();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
-        if (annotatedMethods.size() == 0) {
+        if (annotatedMethods.isEmpty()) {
             return true;
         }
         DependencyResolver dependencyResolver = new DependencyResolver(trees, roundEnv);
@@ -88,7 +94,7 @@ public class LambdaProcessor extends AbstractProcessor {
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
 
-            ExecutableType emeth = (ExecutableType)element.asType();
+            ExecutableType emeth = (ExecutableType) element.asType();
 
             Lambda lambda = element.getAnnotation(Lambda.class);
             LambdaFunction lambdaFunction =
@@ -105,7 +111,7 @@ public class LambdaProcessor extends AbstractProcessor {
                 String packageName = lambdaFunction.generateInputPackage();
                 System.out.println("[TERMITE] Generating local Data Classes. For Package: " + packageName);
                 String generatedClassPath = packageName.substring(8, packageName.length() - 1);
-                JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath +".InputType", null);
+                JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".InputType", null);
                 JavaFileObject outputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".OutputType", null);
                 Writer writer = inputType.openWriter();
                 Writer writer1 = outputType.openWriter();
