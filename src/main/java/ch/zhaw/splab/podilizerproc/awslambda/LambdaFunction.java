@@ -4,6 +4,7 @@ import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import com.sun.source.tree.*;
 
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +67,7 @@ public class LambdaFunction {
      * @return java code of InputType class as a {@link String}
      */
     public String createInputType() {
-        InputTypeEntity inputType = new InputTypeEntity("InputType", method.getParameters(), inputTypes);
+        InputTypeEntity inputType = new InputTypeEntity("InputType", getQualifiedParentType(), method, inputTypes);
         return inputType.create();
     }
 
@@ -102,7 +103,7 @@ public class LambdaFunction {
         }
         if (cu.getPackageName() != null) {
             // Import the target class itself, to make direct use of the annotated method
-            imports.add(cu.getPackageName().toString() + "." + clazz.getSimpleName());
+            imports.add(getQualifiedParentType());
         }
 
         Collections.addAll(imports, defaultImports);
@@ -187,7 +188,12 @@ public class LambdaFunction {
         if (!method.getReturnType().toString().equals("void")) {
             result += "" + method.getReturnType().toString() + " result = ";
         }
-        result += clazz.getSimpleName() + "." + method.getName().toString() + "(";
+        if (method.getModifiers().getFlags().contains(Modifier.STATIC)) {
+            result += clazz.getSimpleName();
+        } else {
+            result += "inputType.getTermiteExplicitThis()";
+        }
+        result += "." + method.getName().toString() + "(";
         int i = 0;
         for (VariableTree param :
                 method.getParameters()) {
@@ -244,5 +250,9 @@ public class LambdaFunction {
                 ", clazz=" + clazz +
                 ", cu=" + cu +
                 '}';
+    }
+
+    private String getQualifiedParentType() {
+        return cu.getPackageName().toString() + "." + clazz.getSimpleName();
     }
 }

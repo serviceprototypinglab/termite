@@ -22,9 +22,14 @@ import org.aspectj.lang.reflect.MethodSignature;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.rmi.server.ExportException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 @Aspect
 public class Invoke {
@@ -73,15 +78,26 @@ public class Invoke {
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
         try {
+            List<Object> ctorArgs = new ArrayList<>();
+            if (!Modifier.isStatic(joinPoint.getSignature().getModifiers())) {
+                System.out.println("Adding explcit this arg...");
+                ctorArgs.add(joinPoint.getTarget());
+            }
+            ctorArgs.addAll(Arrays.asList(joinPoint.getArgs()));
+
+
             Constructor<Object> correctCtor = null;
             for (Constructor<Object> constructor : inClazz.getConstructors()) {
-                if (constructor.getParameterCount() == joinPoint.getArgs().length) {
+                if (constructor.getParameterCount() == ctorArgs.size()) {
                     correctCtor = constructor;
                     break;
                 }
             }
-            Object inputObj = correctCtor.newInstance(joinPoint.getArgs());
+
+            Object inputObj = correctCtor.newInstance(ctorArgs.toArray());
             json = objectMapper.writeValueAsString(inputObj);
+            // TODO: Remove these verbose printouts (Or make log level configurable)
+            System.out.println("[TERMITE] Sending: " + json);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -92,8 +108,16 @@ public class Invoke {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
-            outObj = objectMapper.readValue(byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(),
-                    StandardCharsets.UTF_8), outClazz);
+            String resultJson = byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(), StandardCharsets.UTF_8);
+            System.out.println("[TERMITE] Receiving: " + resultJson);
+            System.out.println("!!!!!!!!!!!!!!!!!");
+            try {
+                outObj = objectMapper.readValue(resultJson, outClazz);
+            } catch (Throwable t) {
+                System.out.println("ERRRRRROOOOOOOOR");
+                System.out.println(resultJson);
+            }
+            // TODO: Remove these verbose printouts (Or make log level configurable)
 
             Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getReturnType();
             if (!returnType.equals(void.class)) {
