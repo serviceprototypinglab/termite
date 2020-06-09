@@ -4,7 +4,6 @@ import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import com.sun.source.tree.*;
 
-import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +17,6 @@ public class LambdaFunction {
     private final MethodTree method;
     private final ClassTree clazz;
     private final CompilationUnitTree cu;
-    private final List<VariableTree> fields = new ArrayList<>();
     private final Filer awsFiler;
     private final Lambda lambdaAnnotation;
     private final Set<CompilationUnitInfo> requiredCompilationUnits;
@@ -39,17 +37,6 @@ public class LambdaFunction {
         this.requiredCompilationUnits = requiredCompilationUnits;
         this.inputTypes = inputTypes;
         this.resultType = resultType;
-        for (Tree tree :
-                clazz.getMembers()) {
-            if (tree.getKind() == Tree.Kind.VARIABLE) {
-                VariableTree field = (VariableTree) tree;
-                //exclude static and final fields from list
-                if (!field.getModifiers().getFlags().contains(Modifier.STATIC) &
-                        !field.getModifiers().getFlags().contains(Modifier.FINAL)) {
-                    fields.add(field);
-                }
-            }
-        }
         awsFiler = new Filer(cu, clazz, method);
     }
 
@@ -69,7 +56,6 @@ public class LambdaFunction {
     public String create() {
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
-        //result += "\n" + Utility.fieldsToString(fields);
         result += "\n" + generateHandler();
         result += "\n" + removeAnnotations(method);
         return result + "\n}";
@@ -129,7 +115,7 @@ public class LambdaFunction {
         StringBuilder result = new StringBuilder();
         for (String importStr :
                 imports) {
-            result.append("import " + importStr + ";\n");
+            result.append("import ").append(importStr).append(";\n");
         }
         return String.valueOf(result);
     }
@@ -172,11 +158,6 @@ public class LambdaFunction {
                 "\t\tobjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);\n" +
                 "\t\tString inputString = IOUtils.toString(inputStream);\n" +
                 "\t\tInputType inputType = objectMapper.readValue(inputString, InputType.class);\n";
-//        for (VariableTree field :
-//                fields) {
-//            String var = field.getName().toString();
-//            result += "\t\tthis." + var + " = inputType.get" + Utility.firstLetterToUpperCase(var) + "();\n";
-//        }
         result += "\t\t" + generateMethodCall();
         result += "\t\tOutputType outputType = new OutputType(\"Lambda environment\"";
         result += ", System.currentTimeMillis() - time";
@@ -200,10 +181,10 @@ public class LambdaFunction {
         String methodString = method.toString();
         String[] lines = methodString.split("\n");
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < lines.length; i++) {
-            if (!lines[i].startsWith("@Lambda") && !lines[i].startsWith("@Invoker")) {
+        for (String line : lines) {
+            if (!line.startsWith("@Lambda") && !line.startsWith("@Invoker")) {
                 result.append("\t");
-                result.append(lines[i]);
+                result.append(line);
                 result.append("\n");
             }
         }
