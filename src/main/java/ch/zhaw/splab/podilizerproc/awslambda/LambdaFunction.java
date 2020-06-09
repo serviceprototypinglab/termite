@@ -5,13 +5,14 @@ import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import com.sun.source.tree.*;
 
 import javax.lang.model.element.Modifier;
+import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 /**
- *Entity of the AWS lambda function
+ * Entity of the AWS lambda function
  */
 public class LambdaFunction {
     private final MethodTree method;
@@ -21,20 +22,30 @@ public class LambdaFunction {
     private final Filer awsFiler;
     private final Lambda lambdaAnnotation;
     private final Set<CompilationUnitInfo> requiredCompilationUnits;
+    private final List<? extends TypeMirror> inputTypes;
+    private final TypeMirror resultType;
 
-    public LambdaFunction(MethodTree method, ClassTree clazz, CompilationUnitTree cu, Lambda lambdaAnnotation, Set<CompilationUnitInfo> requiredCompilationUnits) {
+    public LambdaFunction(MethodTree method,
+                          ClassTree clazz,
+                          CompilationUnitTree cu,
+                          Lambda lambdaAnnotation,
+                          Set<CompilationUnitInfo> requiredCompilationUnits,
+                          List<? extends TypeMirror> inputTypes,
+                          TypeMirror resultType) {
         this.method = method;
         this.clazz = clazz;
         this.cu = cu;
         this.lambdaAnnotation = lambdaAnnotation;
         this.requiredCompilationUnits = requiredCompilationUnits;
+        this.inputTypes = inputTypes;
+        this.resultType = resultType;
         for (Tree tree :
                 clazz.getMembers()) {
             if (tree.getKind() == Tree.Kind.VARIABLE) {
-                VariableTree field = (VariableTree)tree;
+                VariableTree field = (VariableTree) tree;
                 //exclude static and final fields from list
                 if (!field.getModifiers().getFlags().contains(Modifier.STATIC) &
-                        !field.getModifiers().getFlags().contains(Modifier.FINAL)){
+                        !field.getModifiers().getFlags().contains(Modifier.FINAL)) {
                     fields.add(field);
                 }
             }
@@ -52,9 +63,10 @@ public class LambdaFunction {
 
     /**
      * Generates java code lambda function for appropriate method
+     *
      * @return {@link String} of generated java code
      */
-    public String create(){
+    public String create() {
         String result = importsToString(imports());
         result += "\n" + getClassSpecification();
         //result += "\n" + Utility.fieldsToString(fields);
@@ -65,27 +77,30 @@ public class LambdaFunction {
 
     /**
      * Creates InputType class java code
+     *
      * @return java code of InputType class as a {@link String}
      */
-    public String createInputType(){
-        InputTypeEntity inputType = new InputTypeEntity("InputType", method.getParameters());
+    public String createInputType() {
+        InputTypeEntity inputType = new InputTypeEntity("InputType", method.getParameters(), inputTypes);
         return inputType.create();
     }
 
     /**
      * Creates OutputType class java code
+     *
      * @return java code of OutputType class as a {@link String}
      */
-    public String createOutputType(){
-        OutputTypeEntity outputType = new OutputTypeEntity("OutputType", method.getReturnType());
+    public String createOutputType() {
+        OutputTypeEntity outputType = new OutputTypeEntity("OutputType", method.getReturnType(), resultType);
         return outputType.create();
     }
 
     /**
      * Creates list of imports to be added to lambda function compilation unit
+     *
      * @return {@link String[]} of imports;
      */
-    public List<String> imports(){
+    public List<String> imports() {
         List<String> imports = new ArrayList<>();
         String[] defaultImports = {
                 "com.amazonaws.services.lambda.runtime.Context",
@@ -106,10 +121,11 @@ public class LambdaFunction {
 
     /**
      * Turns list of imports into string of java code
+     *
      * @param imports is list of imports(Strings)
      * @return {@link String} of combined imports ready ti insert as java code
      */
-    private String importsToString(List<String> imports){
+    private String importsToString(List<String> imports) {
         StringBuilder result = new StringBuilder();
         for (String importStr :
                 imports) {
@@ -121,16 +137,17 @@ public class LambdaFunction {
 
     /**
      * Generates lambda function class specification. Based on 'implements' and 'extends' of external class
+     *
      * @return {@link String} of class declaration
      */
-    private String getClassSpecification(){
+    private String getClassSpecification() {
         String result = "public class LambdaFunction";
         String implementsString = "implements RequestStreamHandler";
-        for (Tree implement:
+        for (Tree implement :
                 clazz.getImplementsClause()) {
             implementsString += ", " + implement.toString();
         }
-        if (clazz.getExtendsClause() == null){
+        if (clazz.getExtendsClause() == null) {
             return result + " " + implementsString + " {";
         }
         String extendsString = "extends " + clazz.getExtendsClause().toString();
@@ -144,9 +161,10 @@ public class LambdaFunction {
 
     /**
      * Generates handler code
+     *
      * @return {@link String} of handler java code
      */
-    private String generateHandler(){
+    private String generateHandler() {
         String result = "\tpublic void handleRequest(InputStream inputStream, OutputStream outputStream, " +
                 "Context context) throws IOException {\n" +
                 "\t\tlong time = System.currentTimeMillis();" +
@@ -162,7 +180,7 @@ public class LambdaFunction {
         result += "\t\t" + generateMethodCall();
         result += "\t\tOutputType outputType = new OutputType(\"Lambda environment\"";
         result += ", System.currentTimeMillis() - time";
-        if (!method.getReturnType().toString().equals("void")){
+        if (!method.getReturnType().toString().equals("void")) {
             result += ", result";
         }
         result += ");\n";
@@ -174,15 +192,16 @@ public class LambdaFunction {
 
     /**
      * Removes "@Lambda" and "@Invoker" annotations from method and adds "\t" to every string
+     *
      * @param method to be formatted
      * @return {@link String} of formatted method
      */
-    private String removeAnnotations(MethodTree method){
+    private String removeAnnotations(MethodTree method) {
         String methodString = method.toString();
         String[] lines = methodString.split("\n");
         StringBuilder result = new StringBuilder();
-        for (int i = 0; i < lines.length; i++){
-            if (!lines[i].startsWith("@Lambda") && !lines[i].startsWith("@Invoker")){
+        for (int i = 0; i < lines.length; i++) {
+            if (!lines[i].startsWith("@Lambda") && !lines[i].startsWith("@Invoker")) {
                 result.append("\t");
                 result.append(lines[i]);
                 result.append("\n");
@@ -193,19 +212,20 @@ public class LambdaFunction {
 
     /**
      * Generates method call expression for lambda class
+     *
      * @return java code line as {@link String}
      */
-    private String generateMethodCall(){
+    private String generateMethodCall() {
         String result = "";
-        if (!method.getReturnType().toString().equals("void")){
-            result +=  "" + method.getReturnType().toString() + " result = ";
+        if (!method.getReturnType().toString().equals("void")) {
+            result += "" + method.getReturnType().toString() + " result = ";
         }
         result += method.getName().toString() + "(";
         int i = 0;
         for (VariableTree param :
-                method.getParameters()){
+                method.getParameters()) {
             String getCall = "inputType.get" + Utility.firstLetterToUpperCase(param.getName().toString()) + "()";
-            if (i == 0){
+            if (i == 0) {
                 result += getCall;
             } else {
                 result += ", " + getCall;
@@ -218,9 +238,10 @@ public class LambdaFunction {
 
     /**
      * Generates package declaration line for InputType
+     *
      * @return generated {@link String} with format 'aws.originalPackage.originalClass.originalMethod#argsNumber'
      */
-    public String generateInputPackage(){
+    public String generateInputPackage() {
         String result = "package aws.";
         result += getLambdaFunctionName().replace('_', '.');
         return result + ";";
@@ -228,17 +249,18 @@ public class LambdaFunction {
 
     /**
      * Generates name for lambda function
+     *
      * @return {@link String} in format 'originalPackage_originalClass_originalMethod#argsNumber'
      */
-    public String getLambdaFunctionName(){
+    public String getLambdaFunctionName() {
         String result = "";
-        if (cu.getPackageName() != null){
+        if (cu.getPackageName() != null) {
             result += cu.getPackageName().toString().replace('.', '_');
             result += "_";
         }
         result += clazz.getSimpleName();
         result += "_" + method.getName().toString();
-        if (method.getParameters() != null){
+        if (method.getParameters() != null) {
             result += method.getParameters().size();
         }
         return result;

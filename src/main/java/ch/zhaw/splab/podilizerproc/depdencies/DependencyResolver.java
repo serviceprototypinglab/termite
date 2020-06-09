@@ -8,9 +8,6 @@ import com.sun.source.util.Trees;
 
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Types;
-import javax.tools.JavaFileObject;
 import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;

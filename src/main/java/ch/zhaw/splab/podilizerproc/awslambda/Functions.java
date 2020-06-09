@@ -106,7 +106,10 @@ public class Functions {
                 PrintWriter writer = new PrintWriter(targetFile)) {
                 String nextLine;
                 while ((nextLine = bufferedReader.readLine()) != null) {
-                    writer.println(nextLine);
+                    if (!nextLine.contains("@Lambda")) {
+                        writer.println(nextLine);
+                    }
+                    // TODO properly remove annotations from code instead of this workaround
                 }
             } catch (IOException e) {
                 System.out.println("[TERMITE] Failed to copy required compilation unit to " + absoluteFilePath);

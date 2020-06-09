@@ -7,6 +7,7 @@ import ch.zhaw.splab.podilizerproc.depdencies.DependencyResolver;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.MethodTree;
+import com.sun.source.tree.VariableTree;
 import com.sun.source.util.SimpleTreeVisitor;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.TreePathScanner;
@@ -19,6 +20,8 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,10 +79,17 @@ public class LambdaProcessor extends AbstractProcessor {
             TreePath tp1 = trees.getPath(getMostExternalType(element));
             cuVisitor.visit(tp1, trees);
 
+            ExecutableType emeth = (ExecutableType)element.asType();
 
             Lambda lambda = element.getAnnotation(Lambda.class);
             LambdaFunction lambdaFunction =
-                    new LambdaFunction(methodScanner.getMethod(), typeScanner.getClazz(), cuVisitor.getCu(), lambda, requiredCompilationUnits);
+                    new LambdaFunction(methodScanner.getMethod(),
+                            typeScanner.getClazz(),
+                            cuVisitor.getCu(),
+                            lambda,
+                            requiredCompilationUnits,
+                            emeth.getParameterTypes(),
+                            emeth.getReturnType());
             functions.add(lambdaFunction);
 
         }

@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class PoJoEntity {
     private String className;
+    protected List<String> importStatments = new ArrayList<>();
     protected List<AbstractMap.SimpleEntry<String, String>> fields;
 
     public PoJoEntity(String className) {
@@ -15,7 +16,8 @@ public abstract class PoJoEntity {
     }
 
     public String create() {
-        String result = "public class " + className + "{\n";
+        String result = generateImportStatements();
+        result += "public class " + className + "{\n";
         result += generateFieldsDeclaration() + "\n";
         result += generateDefaultConstructor();
         if (fields.size() != 0){
@@ -25,6 +27,12 @@ public abstract class PoJoEntity {
         }
         result += "}";
         return result;
+    }
+
+    private String generateImportStatements() {
+        StringBuilder stringBuilder = new StringBuilder();
+        importStatments.forEach(statement -> stringBuilder.append("import ").append(statement).append(";\n"));
+        return stringBuilder.toString();
     }
 
     /**
