@@ -183,8 +183,6 @@ public class LambdaFunction {
     private String generateMethodCall() {
         // TODO: Handle non static methods by adding another field to input type containing the target object AND
         //  another field to the output type which will contain the modified object
-        System.out.println("Class Name is: " + clazz.toString());
-        System.out.println("Simple name is: " + clazz.getSimpleName());
         String result = "";
         if (!method.getReturnType().toString().equals("void")) {
             result += "" + method.getReturnType().toString() + " result = ";

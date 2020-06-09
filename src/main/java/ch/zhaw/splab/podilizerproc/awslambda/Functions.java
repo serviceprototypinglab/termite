@@ -65,10 +65,10 @@ public class Functions {
                 String lamdaJarLocation = function.getAwsFiler().getPomPath().toString();
                 lamdaJarLocation = lamdaJarLocation.replace('\\', '/') + "/target/lambda-java-1.0-SNAPSHOT.jar";
 
-                JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(), lamdaJarLocation, "LambdaFunction::handleRequest",
-                        function.getLambdaAnnotation().region(), function.getLambdaAnnotation().timeOut(),
-                        function.getLambdaAnnotation().memorySize(), function.getLambdaAnnotation().endPoint());
-                jarUploader.uploadFunction();
+                //JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(), lamdaJarLocation, "LambdaFunction::handleRequest",
+                //        function.getLambdaAnnotation().region(), function.getLambdaAnnotation().timeOut(),
+                //        function.getLambdaAnnotation().memorySize(), function.getLambdaAnnotation().endPoint());
+                //jarUploader.uploadFunction();
             } catch (IOException e) {
                 e.printStackTrace();
             }

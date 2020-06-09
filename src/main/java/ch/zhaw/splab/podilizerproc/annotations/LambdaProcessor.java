@@ -23,6 +23,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -91,6 +94,25 @@ public class LambdaProcessor extends AbstractProcessor {
                             emeth.getParameterTypes(),
                             emeth.getReturnType());
             functions.add(lambdaFunction);
+
+            try {
+                String packageName = lambdaFunction.generateInputPackage();
+                String generatedClassPath = packageName.substring(8, packageName.length() - 1);
+                JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath +".InputType", null);
+                JavaFileObject outputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".OutputType", null);
+                Writer writer = inputType.openWriter();
+                Writer writer1 = outputType.openWriter();
+                writer.append(lambdaFunction.generateInputPackage() + "\n\n");
+                writer1.append(lambdaFunction.generateInputPackage() + "\n\n");
+                writer.append(lambdaFunction.createInputType());
+                writer1.append(lambdaFunction.createOutputType());
+                writer.flush();
+                writer1.flush();
+                writer.close();
+                writer1.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
         }
         Functions functionsWriter = new Functions(functions);

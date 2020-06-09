@@ -20,7 +20,6 @@ public class InputTypeEntity extends PoJoEntity {
         for (TypeMirror inputType : inputTypes) {
             String typeString = inputType.toString();
             if (typeString.contains(".")) {
-                System.out.println("INPUT IMPORT: " + typeString);
                 importStatments.add(typeString);
             }
         }

@@ -32,6 +32,7 @@ public abstract class PoJoEntity {
     private String generateImportStatements() {
         StringBuilder stringBuilder = new StringBuilder();
         importStatments.forEach(statement -> stringBuilder.append("import ").append(statement).append(";\n"));
+        stringBuilder.append("\n"); // Make it look nice :)
         return stringBuilder.toString();
     }
 
