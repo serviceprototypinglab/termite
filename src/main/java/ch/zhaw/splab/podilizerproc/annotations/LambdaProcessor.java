@@ -35,6 +35,8 @@ import java.util.Set;
  */
 @SupportedAnnotationTypes({"ch.zhaw.splab.podilizerproc.annotations.Lambda"})
 public class LambdaProcessor extends AbstractProcessor {
+    private static boolean LAMBDAS_PROCESSED = false;
+
     private Trees trees;
     private Types typeUtils;
 
@@ -46,15 +48,19 @@ public class LambdaProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        trees = Trees.instance(processingEnv);
-
-        System.out.println("[TERMITE] Annotation Proccessor init.");
-        typeUtils = processingEnv.getTypeUtils();
+        if (!LAMBDAS_PROCESSED) {
+            trees = Trees.instance(processingEnv);
+            System.out.println("[TERMITE] Annotation Proccessor init.");
+            typeUtils = processingEnv.getTypeUtils();
+        }
 
     }
 
 
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        // TODO: For a normal maven compile call this class / method is called twice.
+        //  This method should somehow detect if it was already run and should avoid executing twice.
+
         List<LambdaFunction> functions = new ArrayList<>();
 
         Set<? extends Element> annotatedMethods = roundEnv.getElementsAnnotatedWith(Lambda.class);
@@ -97,6 +103,7 @@ public class LambdaProcessor extends AbstractProcessor {
 
             try {
                 String packageName = lambdaFunction.generateInputPackage();
+                System.out.println("[TERMITE] Generating local Data Classes. For Package: " + packageName);
                 String generatedClassPath = packageName.substring(8, packageName.length() - 1);
                 JavaFileObject inputType = processingEnv.getFiler().createSourceFile(generatedClassPath +".InputType", null);
                 JavaFileObject outputType = processingEnv.getFiler().createSourceFile(generatedClassPath + ".OutputType", null);
@@ -110,8 +117,9 @@ public class LambdaProcessor extends AbstractProcessor {
                 writer1.flush();
                 writer.close();
                 writer1.close();
+                System.out.println("[TERMITE] Successfully generated local sources.");
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println("[TERMITE] Failed to generate local sources. They probably already exist.");
             }
 
         }
