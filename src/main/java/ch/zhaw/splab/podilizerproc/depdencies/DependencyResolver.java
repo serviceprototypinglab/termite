@@ -76,7 +76,7 @@ public class DependencyResolver {
             System.out.println("[TERMITE] WARNING: Unable to find package " + packageName);
             return Collections.emptySet();
         } else {
-            System.out.println("[TERMITE] Found required dependencies for " + packageName);
+            System.out.println("[TERMITE] Found required dependencies for package " + packageName);
             return packageInfo.getRelevantDependencies(rootPckg)
                     .stream()
                     .map(JavaPackageInfo::getCompilationUnits)

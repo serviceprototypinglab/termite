@@ -32,10 +32,8 @@ public class Functions {
                 functions) {
             try {
                 String path = function.getAwsFiler().getPath().toString();
-                System.out.println("Path is: " + path);
                 function.getAwsFiler().createDirectories();
                 File file  = new File(path + "/LambdaFunction.java");
-                System.out.println(file.getAbsolutePath());
                 PrintWriter printWriter = new PrintWriter(file);
                 printWriter.print(function.create());
                 printWriter.close();
@@ -99,7 +97,6 @@ public class Functions {
                 System.out.println("[TERMITE] WARNING: File already exists " + absoluteFilePath);
             }
 
-            System.out.println("[TERMITE] START WRITE " + absoluteFilePath);
             try(Reader reader = sourceFile.openReader(true);
                 BufferedReader bufferedReader = new BufferedReader(reader);
                 PrintWriter writer = new PrintWriter(targetFile)) {

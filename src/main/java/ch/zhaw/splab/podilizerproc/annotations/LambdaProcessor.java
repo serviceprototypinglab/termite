@@ -48,7 +48,6 @@ public class LambdaProcessor extends AbstractProcessor {
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         trees = Trees.instance(processingEnv);
-        System.out.println("[TERMITE] Annotation Proccessor init.");
         typeUtils = processingEnv.getTypeUtils();
 
     }
@@ -81,11 +80,7 @@ public class LambdaProcessor extends AbstractProcessor {
             TypeScanner typeScanner = new TypeScanner();
             CUVisitor cuVisitor = new CUVisitor();
 
-
-            System.out.println("###############################################################");
             Set<CompilationUnitInfo> requiredCompilationUnits = dependencyResolver.resolveDependencies(element);
-            System.out.println("###############################################################");
-
 
             TreePath tp = trees.getPath(element);
             methodScanner.scan(tp, trees);
