@@ -37,7 +37,7 @@ public class Invoke {
 
     @Around("@annotation(lambda)")
     public Object anyExec(ProceedingJoinPoint joinPoint,
-                          ch.zhaw.splab.podilizerproc.annotations.Lambda lambda) {
+                          ch.zhaw.splab.podilizerproc.annotations.Lambda lambda) throws Throwable {
         System.out.println("[TERMITE] Annotation invoked");
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -45,7 +45,8 @@ public class Invoke {
         return invokeOnLambda(method, lambda, joinPoint);
     }
 
-    private Object invokeOnLambda(Method method, Lambda lambda, ProceedingJoinPoint joinPoint) {
+    private Object invokeOnLambda(Method method, Lambda lambda, ProceedingJoinPoint joinPoint) throws Throwable {
+        Thread.dumpStack();
         Class inClazz = null;
         Class outClazz = null;
         try {
@@ -128,21 +129,24 @@ public class Invoke {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Function " + method.getName() + " is unreachable. Processing locally...");
-            try {
-                methodResult = joinPoint.proceed(joinPoint.getArgs());
-            } catch (Throwable throwable) {
-                throwable.printStackTrace();
-            }
+
+            // Note: While using the joinPoint to proceed normal execution, the code will sometimes be executed twice.
+            // This is a known AspectJ Bug documented here: https://github.com/spring-projects/spring-framework/issues/24046
+            methodResult = joinPoint.proceed();
         }
 
         try {
-            String functionReport = "Thread of Function " + method.getName() + " invocation was finished. " +
-                    "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
-                    " - for " + outObj.getClass().getDeclaredMethod("getTime", null).invoke(outObj) + " ms";
-            if (!method.getReturnType().toString().equals("void")) {
-                functionReport += "; Return value is: " + outObj.getClass().getDeclaredMethod("getResult", null).invoke(outObj);
+            if (outObj != null) {
+                String functionReport = "Thread of Function " + method.getName() + " invocation was finished. " +
+                        "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
+                        " - for " + outObj.getClass().getDeclaredMethod("getTime", null).invoke(outObj) + " ms";
+                if (!method.getReturnType().toString().equals("void")) {
+                    functionReport += "; Return value is: " + outObj.getClass().getDeclaredMethod("getResult", null).invoke(outObj);
+                }
+                System.out.println(functionReport);
+            } else {
+                System.out.println("Processed " + method.getName() + " locally with result " + methodResult);
             }
-            System.out.println(functionReport);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace();
         }
