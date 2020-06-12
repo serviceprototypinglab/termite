@@ -1,5 +1,6 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
+import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -102,13 +103,10 @@ public class Functions {
             try(Reader reader = sourceFile.openReader(true);
                 BufferedReader bufferedReader = new BufferedReader(reader);
                 PrintWriter writer = new PrintWriter(targetFile)) {
-                String nextLine;
-                while ((nextLine = bufferedReader.readLine()) != null) {
-                    if (!nextLine.contains("@Lambda")) {
-                        writer.println(nextLine);
-                    }
-                    // TODO properly remove annotations from code instead of this workaround
-                }
+                bufferedReader
+                        .lines()
+                        .map(line -> line.replaceAll("@\\s*Lambda(\\s*\\([^)]*\\))?", ""))
+                        .forEach(writer::println);
             } catch (IOException e) {
                 System.out.println("[TERMITE] Failed to copy required compilation unit to " + absoluteFilePath);
                 e.printStackTrace();

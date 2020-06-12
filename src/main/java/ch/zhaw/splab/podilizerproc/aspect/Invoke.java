@@ -28,7 +28,6 @@ import java.lang.reflect.Modifier;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.rmi.server.ExportException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -114,6 +113,7 @@ public class Invoke {
             System.out.println("[TERMITE] Receiving: " + resultJson);
             try {
                 outObj = objectMapper.readValue(resultJson, outClazz);
+                objectMapper.readerForUpdating(outObj).readValue(resultJson);
             } catch (Throwable t) {
                 System.out.println("[TERMITE] Failed to deserialize result.");
             }
