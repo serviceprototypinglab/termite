@@ -11,6 +11,8 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -69,18 +71,18 @@ public class Invoke {
                 .withCredentials(new AWSStaticCredentialsProvider(credentials))
                 .withRegion(region);
 
-        if (!lambda.endPoint().equals("")){
+        if (!lambda.endPoint().equals("")) {
             clientBuilder = clientBuilder.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(lambda.endPoint(), regionName));
         }
         AWSLambda awsLambda = clientBuilder.build();
 
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         String json = "";
         try {
             List<Object> ctorArgs = new ArrayList<>();
             if (!Modifier.isStatic(joinPoint.getSignature().getModifiers())) {
-                System.out.println("Adding explcit this arg...");
                 ctorArgs.add(joinPoint.getTarget());
             }
             ctorArgs.addAll(Arrays.asList(joinPoint.getArgs()));
@@ -110,19 +112,18 @@ public class Invoke {
             invokeRequest.setPayload(json);
             String resultJson = byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(), StandardCharsets.UTF_8);
             System.out.println("[TERMITE] Receiving: " + resultJson);
-            System.out.println("!!!!!!!!!!!!!!!!!");
             try {
                 outObj = objectMapper.readValue(resultJson, outClazz);
             } catch (Throwable t) {
-                System.out.println("ERRRRRROOOOOOOOR");
-                System.out.println(resultJson);
+                System.out.println("[TERMITE] Failed to deserialize result.");
             }
             // TODO: Remove these verbose printouts (Or make log level configurable)
 
-            Class<?> returnType = ((MethodSignature) joinPoint.getSignature()).getReturnType();
-            if (!returnType.equals(void.class)) {
+            MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+            if (outObj != null && signature != null && !void.class.equals(signature.getReturnType())) {
                 // GetResult is only generated for non void methods
-                methodResult = outObj.getClass().getDeclaredMethod("getResult").invoke(outObj);
+                Method getResultMethod = outObj.getClass().getDeclaredMethod("getResult");
+                methodResult = getResultMethod.invoke(outObj);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -138,7 +139,7 @@ public class Invoke {
             String functionReport = "Thread of Function " + method.getName() + " invocation was finished. " +
                     "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
                     " - for " + outObj.getClass().getDeclaredMethod("getTime", null).invoke(outObj) + " ms";
-            if (!method.getReturnType().toString().equals("void")){
+            if (!method.getReturnType().toString().equals("void")) {
                 functionReport += "; Return value is: " + outObj.getClass().getDeclaredMethod("getResult", null).invoke(outObj);
             }
             System.out.println(functionReport);
@@ -148,7 +149,6 @@ public class Invoke {
 
         return methodResult;
     }
-
 
 
     /**

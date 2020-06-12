@@ -95,7 +95,9 @@ public class LambdaFunction {
                 "com.amazonaws.services.lambda.runtime.RequestStreamHandler",
                 "com.amazonaws.util.IOUtils",
                 "com.fasterxml.jackson.databind.*",
-                "com.amazonaws.services.lambda.runtime.RequestHandler"
+                "com.amazonaws.services.lambda.runtime.RequestHandler",
+                "com.fasterxml.jackson.annotation.JsonAutoDetect",
+                "com.fasterxml.jackson.annotation.PropertyAccessor;"
         };
         for (ImportTree importTree :
                 cu.getImports()) {
@@ -160,6 +162,7 @@ public class LambdaFunction {
                 "Context context) throws IOException {\n" +
                 "\t\tlong time = System.currentTimeMillis();" +
                 "\t\tObjectMapper objectMapper = new ObjectMapper();\n" +
+                "\t\tobjectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);\n" +
                 "\t\tobjectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);\n" +
                 "\t\tString inputString = IOUtils.toString(inputStream);\n" +
                 "\t\tInputType inputType = objectMapper.readValue(inputString, InputType.class);\n";
