@@ -19,7 +19,11 @@ public class OutputTypeEntity extends PoJoEntity {
         }
         String resultTypeStr = resultType.toString();
         if (resultTypeStr.contains(".")) {
-            importStatments.add(resultTypeStr);
+            if (resultTypeStr.contains("<")) {
+                importStatments.addAll(resolveGenericsFromImport(resultTypeStr));
+            } else {
+                importStatments.add(resultTypeStr);
+            }
         }
     }
 }

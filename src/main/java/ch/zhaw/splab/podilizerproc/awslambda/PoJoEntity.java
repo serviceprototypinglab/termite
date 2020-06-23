@@ -4,6 +4,9 @@ package ch.zhaw.splab.podilizerproc.awslambda;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class PoJoEntity {
     private String className;
@@ -110,5 +113,10 @@ public abstract class PoJoEntity {
             result += "\tprivate " + entry.getKey() + " " + entry.getValue() + ";\n";
         }
         return result;
+    }
+
+    protected List<String> resolveGenericsFromImport(String str) {
+        // This is a cheap workaround to have all classes of a generic be its own import
+        return Stream.of(str.split("[<>]")).filter(Predicate.not(String::isBlank)).collect(Collectors.toList());
     }
 }

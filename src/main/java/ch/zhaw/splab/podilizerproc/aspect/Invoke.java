@@ -46,7 +46,6 @@ public class Invoke {
     }
 
     private Object invokeOnLambda(Method method, Lambda lambda, ProceedingJoinPoint joinPoint) throws Throwable {
-        Thread.dumpStack();
         Class inClazz = null;
         Class outClazz = null;
         try {
@@ -99,7 +98,7 @@ public class Invoke {
             Object inputObj = correctCtor.newInstance(ctorArgs.toArray());
             json = objectMapper.writeValueAsString(inputObj);
             // TODO: Remove these verbose printouts (Or make log level configurable)
-            System.out.println("[TERMITE] Sending: " + json);
+            System.out.println("[TERMITE] Sending json input.");
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException | JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -111,12 +110,14 @@ public class Invoke {
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
             String resultJson = byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(), StandardCharsets.UTF_8);
-            System.out.println("[TERMITE] Receiving: " + resultJson);
+            System.out.println("[TERMITE] Received json output.");
+            System.out.flush();
             try {
                 outObj = objectMapper.readValue(resultJson, outClazz);
                 objectMapper.readerForUpdating(outObj).readValue(resultJson);
             } catch (Throwable t) {
                 System.out.println("[TERMITE] Failed to deserialize result.");
+                t.printStackTrace();
             }
             // TODO: Remove these verbose printouts (Or make log level configurable)
 

@@ -32,10 +32,12 @@ public class InputTypeEntity extends PoJoEntity {
         for (TypeMirror inputType : inputTypes) {
             String typeString = inputType.toString();
             if (typeString.contains(".")) {
-                importStatments.add(typeString);
+                if (typeString.contains("<")) {
+                    importStatments.addAll(resolveGenericsFromImport(typeString));
+                } else {
+                    importStatments.add(typeString);
+                }
             }
         }
-
-
     }
 }
