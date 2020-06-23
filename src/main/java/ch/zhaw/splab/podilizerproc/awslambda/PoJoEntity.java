@@ -117,6 +117,9 @@ public abstract class PoJoEntity {
 
     protected List<String> resolveGenericsFromImport(String str) {
         // This is a cheap workaround to have all classes of a generic be its own import
-        return Stream.of(str.split("[<>]")).filter(Predicate.not(String::isBlank)).collect(Collectors.toList());
+        return Stream.of(str.split("[<>]"))
+                .filter(Predicate.not(String::isBlank))
+                .filter(typeName -> typeName.contains(".")) // filter out build-in types
+                .collect(Collectors.toList());
     }
 }
