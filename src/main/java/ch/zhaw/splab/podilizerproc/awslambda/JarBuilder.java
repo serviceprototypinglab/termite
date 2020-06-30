@@ -46,7 +46,11 @@ public class JarBuilder {
         Invoker invoker = new DefaultInvoker();
         try {
             if (invoker.getMavenHome() == null) {
-                invoker.setMavenHome(new File("/usr/share/maven/"));
+                String mavenHome = System.getenv("MAVEN_HOME");
+                if (mavenHome == null || mavenHome.isEmpty()) {
+                    mavenHome = "/usr/share/maven/";
+                }
+                invoker.setMavenHome(new File(mavenHome));
             }
             //log the build output to file
             PrintStream printStream = new PrintStream(buildLog);

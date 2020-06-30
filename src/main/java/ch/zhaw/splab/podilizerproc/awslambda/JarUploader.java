@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 
 class JarUploader {
     private String region;
-    private String runtime = "java8";
+    private String runtime = "java11";
     private String role;
     private String functionName;
     private String zipFile;
@@ -48,7 +48,7 @@ class JarUploader {
                     try {
                         if (command.startsWith("aws sts")) {
                             //System.out.println("\n\naws sts output: " + input.readLine() + "\n\n");
-                            role = "arn:aws:iam::" + input.readLine() + ":role/lambda_basic_execution";
+                            role = "arn:aws:iam::" + input.readLine() + ":role/service-role/lambda_basic_execution";
                             return;
                         }
 //                        while ((line = input.readLine()) != null)
@@ -108,6 +108,7 @@ class JarUploader {
         if (!endPoint.equals("")){
             result += " --endpoint-url " + endPoint;
         }
+        System.out.println("[TERMITE] Building Command:\n" + result);
         return result;
     }
 

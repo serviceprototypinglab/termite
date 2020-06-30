@@ -42,7 +42,7 @@ public class Filer {
         if (cu.getPackageName() == null) {
             packageName = "aws";
         } else {
-            packageName = "aws/" + cu.getPackageName().toString().replace(',', '/');
+            packageName = "aws/" + cu.getPackageName().toString().replace('.', '/');
         }
 
         clazzName = clazz.getSimpleName().toString();
@@ -71,7 +71,7 @@ public class Filer {
         if (cu.getPackageName() == null) {
             packageName = "aws";
         } else {
-            packageName = "aws/" + cu.getPackageName().toString().replace(',', '/');
+            packageName = "aws/" + cu.getPackageName().toString().replace('.', '/');
         }
 
         clazzName = clazz.getSimpleName().toString();

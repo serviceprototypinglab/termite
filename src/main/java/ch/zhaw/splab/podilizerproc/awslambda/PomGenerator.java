@@ -35,8 +35,8 @@ public class PomGenerator {
         }
 
         Properties proper = model.getProperties();
-        proper.setProperty("maven.compiler.source", "1.8");
-        proper.setProperty("maven.compiler.target", "1.8");
+        proper.setProperty("maven.compiler.source", "11");
+        proper.setProperty("maven.compiler.target", "11");
 
         Build build = new Build();
         Plugin plugin = new Plugin();

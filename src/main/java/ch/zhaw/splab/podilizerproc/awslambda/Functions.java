@@ -1,14 +1,14 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
+import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import org.codehaus.plexus.util.FileUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
+import javax.tools.JavaFileObject;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Set;
 
 public class Functions {
     List<LambdaFunction> functions;
@@ -46,6 +46,8 @@ public class Functions {
                 printWriter2.print(function.createOutputType());
                 printWriter2.close();
 
+                writeRequiredCompilationUnits(path, function);
+
                 ClassLoader cl = getClass().getClassLoader();
                 URLClassLoader urlcl = (URLClassLoader)cl;
                 URL[] classPath = urlcl.getURLs();
@@ -57,9 +59,10 @@ public class Functions {
 
                 jarBuilder.mvnBuild();
 
-                JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(),
-                        function.getAwsFiler().getPomPath().toString() + "/target/lambda-java-1.0-SNAPSHOT.jar",
-                        "LambdaFunction::handleRequest",
+                String lamdaJarLocation = function.getAwsFiler().getPomPath().toString();
+                lamdaJarLocation = lamdaJarLocation.replace('\\', '/') + "/target/lambda-java-1.0-SNAPSHOT.jar";
+
+                JarUploader jarUploader = new JarUploader(function.getLambdaFunctionName(), lamdaJarLocation, "LambdaFunction::handleRequest",
                         function.getLambdaAnnotation().region(), function.getLambdaAnnotation().timeOut(),
                         function.getLambdaAnnotation().memorySize(), function.getLambdaAnnotation().endPoint());
                 jarUploader.uploadFunction();
@@ -69,6 +72,45 @@ public class Functions {
         }
 
     }
+
+    private void writeRequiredCompilationUnits(String path, LambdaFunction function) {
+        Set<CompilationUnitInfo> requiredCompilationUnits = function.getRequiredCompilationUnits();
+        for (CompilationUnitInfo compilationUnit : requiredCompilationUnits) {
+            String packageName = compilationUnit.getPackageName();
+            String absoluteFilePath = path + File.separatorChar + packageName.replace('.', File.separatorChar);
+            absoluteFilePath = absoluteFilePath + File.separatorChar + compilationUnit.getName() + ".java";
+            JavaFileObject sourceFile = compilationUnit.getSourceFile();
+
+            File targetFile = new File(absoluteFilePath);
+            boolean wasCreated = false;
+            try {
+                targetFile.getParentFile().mkdirs();
+                wasCreated = targetFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("[TERMITE] Unable to create new source file at " + absoluteFilePath);
+                e.printStackTrace();
+                continue;
+            }
+            if (!wasCreated) {
+                System.out.println("[TERMITE] WARNING: File already exists " + absoluteFilePath);
+            }
+
+            try(Reader reader = sourceFile.openReader(true);
+                BufferedReader bufferedReader = new BufferedReader(reader);
+                PrintWriter writer = new PrintWriter(targetFile)) {
+                bufferedReader
+                        .lines()
+                        .map(line -> line.replaceAll("@\\s*Lambda(\\s*\\([^)]*\\))?", ""))
+                        .forEach(writer::println);
+            } catch (IOException e) {
+                System.out.println("[TERMITE] Failed to copy required compilation unit to " + absoluteFilePath);
+                e.printStackTrace();
+            }
+
+        }
+
+    }
+
     // TODO: 3/28/17 recreate getting of external libraries(include maven dependencies)
     private void writeExternalCP(String pathOut){
         ClassLoader cl = getClass().getClassLoader();

@@ -1,13 +1,17 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
-import javafx.util.Pair;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class PoJoEntity {
     private String className;
-    protected List<Pair<String, String>> fields;
+    protected List<String> importStatments = new ArrayList<>();
+    protected List<AbstractMap.SimpleEntry<String, String>> fields;
 
     public PoJoEntity(String className) {
         this.className = className;
@@ -15,7 +19,8 @@ public abstract class PoJoEntity {
     }
 
     public String create() {
-        String result = "public class " + className + "{\n";
+        String result = generateImportStatements();
+        result += "public class " + className + "{\n";
         result += generateFieldsDeclaration() + "\n";
         result += generateDefaultConstructor();
         if (fields.size() != 0){
@@ -25,6 +30,13 @@ public abstract class PoJoEntity {
         }
         result += "}";
         return result;
+    }
+
+    private String generateImportStatements() {
+        StringBuilder stringBuilder = new StringBuilder();
+        importStatments.forEach(statement -> stringBuilder.append("import ").append(statement).append(";\n"));
+        stringBuilder.append("\n"); // Make it look nice :)
+        return stringBuilder.toString();
     }
 
     /**
@@ -46,7 +58,7 @@ public abstract class PoJoEntity {
         String result = "\tpublic " + className + "(";
         String constructorBody = "";
         int i = 0;
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             String var = entry.getKey() + " " + entry.getValue();
             if (i == 0) {
                 result += var;
@@ -67,7 +79,7 @@ public abstract class PoJoEntity {
      */
     private String generateGetters() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tpublic " + entry.getKey() + " get" +
                     Utility.firstLetterToUpperCase(entry.getValue() + "(){\n" +
                             "\t\treturn " + entry.getValue() + ";\n\t}\n");
@@ -82,7 +94,7 @@ public abstract class PoJoEntity {
      */
     private String generateSetters() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tpublic void set" + Utility.firstLetterToUpperCase(entry.getValue() +
                     "(" + entry.getKey() + " " + entry.getValue() + "){\n" +
                     "\t\tthis." + entry.getValue() + " = " + entry.getValue() + ";\n\t}\n");
@@ -97,9 +109,17 @@ public abstract class PoJoEntity {
      */
     private String generateFieldsDeclaration() {
         String result = "";
-        for (Pair<String, String> entry : fields) {
+        for (AbstractMap.SimpleEntry<String, String> entry : fields) {
             result += "\tprivate " + entry.getKey() + " " + entry.getValue() + ";\n";
         }
         return result;
+    }
+
+    protected List<String> resolveGenericsFromImport(String str) {
+        // This is a cheap workaround to have all classes of a generic be its own import
+        return Stream.of(str.split("[<>]"))
+                .filter(Predicate.not(String::isBlank))
+                .filter(typeName -> typeName.contains(".")) // filter out build-in types
+                .collect(Collectors.toList());
     }
 }
