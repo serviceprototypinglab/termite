@@ -11,6 +11,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.lambda.AWSLambda;
 import com.amazonaws.services.lambda.AWSLambdaClientBuilder;
 import com.amazonaws.services.lambda.model.InvokeRequest;
+import com.amazonaws.services.lambda.model.InvokeResult;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -109,8 +110,11 @@ public class Invoke {
             InvokeRequest invokeRequest = new InvokeRequest();
             invokeRequest.setFunctionName(functionName);
             invokeRequest.setPayload(json);
-            String resultJson = byteBufferToString(awsLambda.invoke(invokeRequest).getPayload(), StandardCharsets.UTF_8);
-            System.out.println("[TERMITE] Received json output.");
+            System.out.println("[TERMITE] Starting ");
+            InvokeResult invokeResult = awsLambda.invoke(invokeRequest);
+            String resultJson = byteBufferToString(invokeResult.getPayload(), StandardCharsets.UTF_8);
+            System.out.println("[TERMITE] Received json output."
+                    + " Size: " + invokeResult.getSdkHttpMetadata().getAllHttpHeaders().get("Content-Length"));
             System.out.flush();
             try {
                 outObj = objectMapper.readValue(resultJson, outClazz);
@@ -135,15 +139,13 @@ public class Invoke {
             // This is a known AspectJ Bug documented here: https://github.com/spring-projects/spring-framework/issues/24046
             methodResult = joinPoint.proceed();
         }
+        awsLambda.shutdown();
 
         try {
             if (outObj != null) {
                 String functionReport = "Thread of Function " + method.getName() + " invocation was finished. " +
                         "Function performed at - " + outObj.getClass().getDeclaredMethod("getDefaultReturn", null).invoke(outObj) +
                         " - for " + outObj.getClass().getDeclaredMethod("getTime", null).invoke(outObj) + " ms";
-                if (!method.getReturnType().toString().equals("void")) {
-                    functionReport += "; Return value is: " + outObj.getClass().getDeclaredMethod("getResult", null).invoke(outObj);
-                }
                 System.out.println(functionReport);
             } else {
                 System.out.println("Processed " + method.getName() + " locally with result " + methodResult);

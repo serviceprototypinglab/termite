@@ -1,6 +1,5 @@
 package ch.zhaw.splab.podilizerproc.awslambda;
 
-import ch.zhaw.splab.podilizerproc.annotations.Lambda;
 import ch.zhaw.splab.podilizerproc.depdencies.CompilationUnitInfo;
 import org.codehaus.plexus.util.FileUtils;
 
@@ -8,7 +7,6 @@ import javax.tools.JavaFileObject;
 import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Set;
 
